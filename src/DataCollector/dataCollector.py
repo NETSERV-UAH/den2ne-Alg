@@ -9,7 +9,7 @@ class DataGatherer(object):
     """
 
     @staticmethod
-    def getLoads(fileName, threshold):
+    def getLoads(filename, threshold):
         """
             Funcion para recolectar las cargas de los nodos
         """
@@ -17,7 +17,7 @@ class DataGatherer(object):
         loads = dict()
 
         try:
-            with open(fileName, 'r') as file:
+            with open(filename, 'r') as file:
                 reader = csv.reader(file)
                 lines = 0
                 for row in reader:
@@ -30,6 +30,30 @@ class DataGatherer(object):
 
         return loads
 
+    @staticmethod
+    def getEdges(filename):
+        """
+            Funcion para recolectar los enlaces del grafo
+        """
+
+        edges = list()
+
+        try:
+            with open(filename, 'r') as file:
+                reader = csv.reader(file)
+                lines = 0
+                for row in reader:
+                    if lines >= 3:
+                        edges.append({"node_a": row[0], "node_b": row[1], "dist": int(row[2]), "cap": int(row[3])})
+                    lines += 1
+                    print(str(row))
+
+        except Exception as e:
+            print(str(e))
+
+        return edges
+
 
 data = DataGatherer.getLoads('data/loads.csv', 3)
+data2 = DataGatherer.getEdges('data/links.csv')
 print(str(data))
