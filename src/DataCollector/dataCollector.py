@@ -46,14 +46,30 @@ class DataGatherer(object):
                     if lines >= 3:
                         edges.append({"node_a": row[0], "node_b": row[1], "dist": int(row[2]), "cap": int(row[3])})
                     lines += 1
-                    print(str(row))
 
         except Exception as e:
             print(str(e))
 
         return edges
 
+    @staticmethod
+    def getSwitches(filename):
+        """
+            Funcion para recolectar los enlaces especiales del grafo con posibilidad de conmutar
+        """
 
-data = DataGatherer.getLoads('data/loads.csv', 3)
-data2 = DataGatherer.getEdges('data/links.csv')
-print(str(data))
+        switches = list()
+
+        try:
+            with open(filename, 'r') as file:
+                reader = csv.reader(file)
+                lines = 0
+                for row in reader:
+                    if lines >= 3:
+                        switches.append({"node_a": row[0], "node_b": row[1], "state": row[2]})
+                    lines += 1
+
+        except Exception as e:
+            print(str(e))
+
+        return switches
