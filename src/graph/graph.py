@@ -36,7 +36,7 @@ class Graph(object):
 
                 # Vamos a ver si hay que añadir algun nodo virtual y añadimos los vecinos al nodo normal
                 for link in links:
-                    if [match_virtual_nodes for nodes in self.nodes if nodes.name == link["node_b"]] is None:
+                    if self.findNode(link["node_b"]) is None:
                         self.nodes.append(Node(link["node_b"], Node.VIRTUAL, 0))
 
                     # Añadimos los vecinos
