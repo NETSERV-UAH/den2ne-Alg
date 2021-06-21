@@ -73,9 +73,3 @@ class DataGatherer(object):
             print(str(e))
 
         return switches
-
-
-data = DataGatherer.getLoads('data/loads.csv', 3)
-print(str(data))
-
-# Obtener

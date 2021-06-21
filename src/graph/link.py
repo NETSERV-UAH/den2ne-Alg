@@ -5,6 +5,10 @@ class Link(object):
         Clase para gestionar un enlace del grafo
     """
 
+    # Declaramos tipos de enlace mediante variables estáticas de la clase
+    NORMAL = 1
+    SWITCH = 0
+
     def __init__(self, type_link, state, dist, cap):
         """
             Constructor de la clase Link
@@ -13,24 +17,6 @@ class Link(object):
         self.state = state
         self.dist = dist
         self.cap = cap
-
-    # Tipos de enlace
-    @property
-    def NORMAL():
-        return 1
-
-    @property
-    def SWITCH():
-        return 0
-
-    # Estados del enlace
-    @property
-    def OPEN():
-        return 1
-
-    @property
-    def CLOSED():
-        return 0
 
     @staticmethod
     def ft2meters(fts):

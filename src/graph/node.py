@@ -1,12 +1,16 @@
 #!/usr/bin/python3
 
-from link import Link
+from .link import Link
 
 
 class Node(object):
     """
         Clase para gestionar un nodo del grafo
     """
+
+    # Declaramos los tipos de nodos mediante variables estáticas de la clase
+    NORMAL = 1
+    VIRTUAL = 0
 
     def __init__(self, name, type_node, load=0, neighbors=[]):
         """
@@ -18,19 +22,9 @@ class Node(object):
         self.neighbors = neighbors
         self.links = list()
 
-    def addNeigbor(self, neighbor, dist, cap, type_link, state):
+    def addNeigbor(self, neighbor, type_link, state, dist, cap):
         """
             Funcion para añadir un vecino
         """
         self.neighbors.append(neighbor)
         self.links.append(Link(type_link, state, dist, cap))
-
-    # Tipos de nodos
-
-    @property
-    def NORMAL():
-        return 1
-
-    @property
-    def VIRTUAL():
-        return 0
