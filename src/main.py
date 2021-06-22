@@ -16,12 +16,20 @@ def main():
     G = Graph(0, loads, edges, sw_edges)
 
     # Parseamos a NetworkX y pintamos el grafo
-    G.plotGraph(positions)
+    G.plotGraph(positions, 'IEEE 123 Node test feeder - Graph')
 
+    # Lo ideal sería automatizar el proceso de poda del grafo de aquellos nodos virtuales que estén a modo de apliación.
+    # De momento lo vamos a hacer a mano, ya que vamos mal de tiempo.
+    to_prune = ['250', '251', '350', '450', '451', '61', '610']
+    for nodes in to_prune:
+        G.removeNode(nodes)
+
+    G.plotGraph(positions, ' IEEE 123 Node test feeder - Pruned Graph')
     print('Ejecutamos mas cosas')
 
     # Sacamos las figuras en modo iteractivo (Metodo que bloquea el flujo del script)
     G.showGraph()
+
 
 if __name__ == "__main__":
     main()

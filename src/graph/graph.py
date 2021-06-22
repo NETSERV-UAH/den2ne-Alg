@@ -3,7 +3,7 @@
 from .node import Node
 from .link import Link
 import networkx as nx
-import matplotlib as plt
+import matplotlib.pyplot as plt
 
 
 class Graph(object):
@@ -43,16 +43,12 @@ class Graph(object):
 
         # A continuación, vamos a añadir a los nodos sus vecinos. Cada enlace es bi-direccional.
         for edge in edges:
-            self.nodes[(self.findNode(edge["node_a"])[0])].addNeigbor(
-                edge["node_b"], Link.NORMAL, 'closed', edge["dist"], edge["cap"])
-            self.nodes[(self.findNode(edge["node_b"])[0])].addNeigbor(
-                edge["node_a"], Link.NORMAL, 'closed', edge["dist"], edge["cap"])
+            self.nodes[(self.findNode(edge["node_a"])[0])].addNeighbor(edge["node_b"], Link.NORMAL, 'closed', edge["dist"], edge["cap"])
+            self.nodes[(self.findNode(edge["node_b"])[0])].addNeighbor(edge["node_a"], Link.NORMAL, 'closed', edge["dist"], edge["cap"])
 
         for sw_edge in switches:
-            self.nodes[self.findNode(sw_edge["node_a"])[0]].addNeigbor(
-                sw_edge["node_b"], Link.SWITCH, sw_edge["state"], 0, 3)
-            self.nodes[self.findNode(sw_edge["node_b"])[0]].addNeigbor(
-                sw_edge["node_a"], Link.SWITCH, sw_edge["state"], 0, 3)
+            self.nodes[self.findNode(sw_edge["node_a"])[0]].addNeighbor(sw_edge["node_b"], Link.SWITCH, sw_edge["state"], 0, 3)
+            self.nodes[self.findNode(sw_edge["node_b"])[0]].addNeighbor(sw_edge["node_a"], Link.SWITCH, sw_edge["state"], 0, 3)
 
     def findNode(self, name):
         """
@@ -65,7 +61,28 @@ class Graph(object):
 
         return None
 
-    def plotGraph(self, positions):
+    def removeNode(self, name):
+        """
+            Funcion para eliminar un nodo del grafo
+        """
+
+        for node in self.nodes:
+            if node.name == name:
+
+                # Primero vamos a los vecinos y eleminimos los enlaces con el
+                for neighbor in node.neighbors:
+                    # Obtenemos el index a eliminar (Es necesario para los enlaces por ser objs, no vale hacer un remove)
+                    index_del = self.nodes[self.findNode(neighbor)[0]].neighbors.index(node.name)
+
+                    # Machacamos el nodo a eliminar como vecino, y con el index, eliminamos el enlace con el.
+                    self.nodes[self.findNode(neighbor)[0]].neighbors.remove(node.name)
+                    del self.nodes[self.findNode(neighbor)[0]].links[index_del]
+
+                # Por último eliminamos el nodo de la lista del grafo
+                self.nodes.remove(node)
+                break
+
+    def plotGraph(self, positions, title):
         """
             Funcion para pintar el grafo
         """
@@ -77,12 +94,9 @@ class Graph(object):
                 G_nx.add_edge(
                     node.name, node.neighbors[node.links.index(link)], type_link=link.type, status=link.state)
 
-        edge_normal = [(u, v) for (u, v, d) in G_nx.edges(
-            data=True) if d["type_link"] == Link.NORMAL]
-        edge_switch_open = [(u, v) for (u, v, d) in G_nx.edges(
-            data=True) if d["type_link"] == Link.SWITCH and d["status"] == 'open']
-        edge_switch_closed = [(u, v) for (u, v, d) in G_nx.edges(
-            data=True) if d["type_link"] == Link.SWITCH and d["status"] == 'closed']
+        edge_normal = [(u, v) for (u, v, d) in G_nx.edges(data=True) if d["type_link"] == Link.NORMAL]
+        edge_switch_open = [(u, v) for (u, v, d) in G_nx.edges(data=True) if d["type_link"] == Link.SWITCH and d["status"] == 'open']
+        edge_switch_closed = [(u, v) for (u, v, d) in G_nx.edges(data=True) if d["type_link"] == Link.SWITCH and d["status"] == 'closed']
 
         pos = nx.spring_layout(G_nx, k=0.2)
 
@@ -95,18 +109,16 @@ class Graph(object):
             else:
                 color_map.append('#95e8d6')
 
+        fig = plt.figure()
         nx.draw_networkx_nodes(G_nx, pos, node_color=color_map, node_size=270)
         nx.draw_networkx_edges(G_nx, pos, edgelist=edge_normal, width=2)
-        nx.draw_networkx_edges(G_nx, pos, edgelist=edge_switch_open,
-                               width=2, alpha=0.5, edge_color="g", style="dashed")
-        nx.draw_networkx_edges(G_nx, pos, edgelist=edge_switch_closed,
-                               width=2, alpha=0.5, edge_color="r", style="dashed")
-        nx.draw_networkx_labels(G_nx, pos, font_size=10,
-                                font_family="sans-serif")
+        nx.draw_networkx_edges(G_nx, pos, edgelist=edge_switch_open, width=2, alpha=0.5, edge_color="g", style="dashed")
+        nx.draw_networkx_edges(G_nx, pos, edgelist=edge_switch_closed, width=2, alpha=0.5, edge_color="r", style="dashed")
+        nx.draw_networkx_labels(G_nx, pos, font_size=10, font_family="sans-serif")
 
-        plt.pyplot.axis("off")
-        plt.pyplot.title(" IEEE 123 Node test feeder - Graph")
-        plt.pyplot.draw()     
+        plt.axis("off")
+        plt.title(title)
+        plt.plot()
 
     @staticmethod
     def showGraph():
@@ -115,4 +127,4 @@ class Graph(object):
         """
         # He estado a nada de meterme con threads y subprocesos con la librería de python de multiprocessing..
         # Mejor lo de dejamos así para ahorrar tiempo. Que sea el usuario quien decida cuando bloquear la ejecución..
-        plt.pyplot.show()
+        plt.show()

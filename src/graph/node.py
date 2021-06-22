@@ -22,7 +22,7 @@ class Node(object):
         self.neighbors = list()
         self.links = list()
 
-    def addNeigbor(self, neighbor, type_link, state, dist, cap):
+    def addNeighbor(self, neighbor, type_link, state, dist, cap):
         """
             Funcion para añadir un vecino
         """
