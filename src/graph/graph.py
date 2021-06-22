@@ -87,7 +87,7 @@ class Graph(object):
         pos = nx.spring_layout(G_nx, k=0.2)
 
         for position in positions:
-            pos[position["node"]] = (position["x"], position["y"])
+            pos[position["node"]] = (position["x"], -position["y"])
 
         for node in G_nx:
             if self.findNode(node)[1].type == Node.NORMAL:
