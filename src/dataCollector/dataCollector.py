@@ -22,7 +22,8 @@ class DataGatherer(object):
                 lines = 0
                 for row in reader:
                     if lines != 0:
-                        loads[row[0]] = [round(float(load), threshold) for load in row[1:]]
+                        loads[row[0]] = [round(float(load), threshold)
+                                         for load in row[1:]]
                     lines += 1
 
         except Exception as e:
@@ -44,7 +45,8 @@ class DataGatherer(object):
                 lines = 0
                 for row in reader:
                     if lines >= 3:
-                        edges.append({"node_a": row[0], "node_b": row[1], "dist": int(row[2]), "cap": int(row[3])})
+                        edges.append(
+                            {"node_a": row[0], "node_b": row[1], "dist": int(row[2]), "cap": int(row[3])})
                     lines += 1
 
         except Exception as e:
@@ -66,10 +68,30 @@ class DataGatherer(object):
                 lines = 0
                 for row in reader:
                     if lines >= 3:
-                        switches.append({"node_a": row[0], "node_b": row[1], "state": row[2]})
+                        switches.append(
+                            {"node_a": row[0], "node_b": row[1], "state": row[2]})
                     lines += 1
 
         except Exception as e:
             print(str(e))
 
         return switches
+
+    @staticmethod
+    def getPositions(filename):
+        """
+            Funcion para recolectar las posiciones de todos los nodos
+        """
+
+        postions = list()
+
+        try:
+            with open(filename, 'r') as file:
+                reader = csv.reader(file)
+                for row in reader:
+                    postions.append({"node": row[0], "x": float(row[1]), "y": float(row[2])})
+
+        except Exception as e:
+            print(str(e))
+
+        return postions

@@ -12,14 +12,14 @@ class Node(object):
     NORMAL = 1
     VIRTUAL = 0
 
-    def __init__(self, name, type_node, load=0, neighbors=[]):
+    def __init__(self, name, type_node, load=0):
         """
             Constructor de la clase Node
         """
         self.name = name
         self.type = type_node
         self.load = load
-        self.neighbors = neighbors
+        self.neighbors = list()
         self.links = list()
 
     def addNeigbor(self, neighbor, type_link, state, dist, cap):
