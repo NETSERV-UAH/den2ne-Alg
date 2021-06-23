@@ -1,7 +1,6 @@
 #!/usr/bin/python3
 
 from .den2neHLMAC import HLMAC
-#from ..graph.graph import Graph
 
 
 class Den2ne(object):
