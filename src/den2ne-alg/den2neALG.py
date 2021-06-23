@@ -1,5 +1,7 @@
 #!/usr/bin/python3
 
+from .den2neHLMAC import HLMAC
+
 
 class Den2ne(object):
     """
