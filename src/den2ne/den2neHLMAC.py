@@ -48,4 +48,4 @@ class HLMAC(object):
         """
             Funcion para imprimir una HLMAC
         """
-        print('.'.join(map(str, addr.hlmac)))
+        return '.'.join(map(str, addr.hlmac))

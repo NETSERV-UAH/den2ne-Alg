@@ -33,6 +33,7 @@ def main():
 
     # Primera fase: difusión de IDs
     G_den2ne_alg.spread_ids()
+    G_den2ne_alg.write_ids_report('results/report_ids.txt')
 
     # Sacamos las figuras en modo iteractivo (Metodo que bloquea el flujo del script)
     G.showGraph()
