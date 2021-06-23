@@ -19,9 +19,10 @@ class HLMAC(object):
         """
         new_addr = list()
 
-        # No podemos asignar sin más la lista ya que si no se coparten referencias, y serían mutables entre ellas.
-        # Por ello, hay que llamar a copy()
-        new_addr = hlmac_parent_addr.hlmac.copy()
+        if hlmac_parent_addr is not None:
+            # No podemos asignar sin más la lista ya que si no se coparten referencias, y serían mutables entre ellas.
+            # Por ello, hay que llamar a copy()
+            new_addr = hlmac_parent_addr.hlmac.copy()
 
         return new_addr.append(name)
 

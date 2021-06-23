@@ -18,7 +18,7 @@ def main():
     # Parseamos a NetworkX y pintamos el grafo
     G.plotGraph(positions, 'IEEE 123 Node test feeder - Graph')
 
-    # Lo ideal sería automatizar el proceso de poda del grafo de aquellos nodos virtuales que estén a modo de apliación.
+    # Lo ideal sería automatizar el proceso de poda del grafo de aquellos nodos virtuales que estén a modo de ampliación.
     # De momento lo vamos a hacer a mano, ya que vamos mal de tiempo.
     to_prune = ['250', '251', '350', '450', '451', '61', '610']
     for nodes in to_prune:
