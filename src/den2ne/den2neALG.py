@@ -9,12 +9,12 @@ class Den2ne(object):
         Clase para gestionar la lógica del algoritmo
     """
 
-    def __init__(self, graft, root='150'):
+    def __init__(self, graft):
         """
             Constructor de la clase Den2ne 
         """
         self.G = graft
-        self.root = root
+        self.root = graft.root
 
     def spread_ids(self):
         """

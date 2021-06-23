@@ -11,11 +11,12 @@ class Graph(object):
         Clase para gestionar el gráfo que representará la red de distribución eléctrica 
     """
 
-    def __init__(self, delta, loads, edges, switches):
+    def __init__(self, delta, loads, edges, switches, root = '150'):
         """
             Constructor de la clase Graph el cual conformará el grafo a partir de los datos procesados.
         """
         self.nodes = list()
+        self.root = root
         self.buildGraph(delta, loads, edges, switches)
 
     def buildGraph(self, delta, loads, edges, switches):
@@ -128,12 +129,9 @@ class Graph(object):
         # Mejor lo de dejamos así para ahorrar tiempo. Que sea el usuario quien decida cuando bloquear la ejecución..
         plt.show()
 
-    def pruneGraph(self, root):
+    def pruneGraph(self):
         """
             Method to automagically prune the graph.
-
-            Args:
-                root (str): The ID of the root node.
 
             Returns:
                 list: A list of the IDs of the nodes that have been pruned.
@@ -148,7 +146,7 @@ class Graph(object):
         for node in self.nodes:
             if (
                 node.type == Node.VIRTUAL and
-                node.name != root and
+                node.name != self.root and
                 len(node.links) == 1 and
                 node.links[0].type == Link.SWITCH
             ):
