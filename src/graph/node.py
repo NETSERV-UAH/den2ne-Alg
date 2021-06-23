@@ -21,6 +21,7 @@ class Node(object):
         self.load = load
         self.neighbors = list()
         self.links = list()
+        self.ids = list()
 
     def addNeighbor(self, neighbor, type_link, state, dist, cap):
         """
