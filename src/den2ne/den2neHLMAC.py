@@ -34,6 +34,13 @@ class HLMAC(object):
         return hlmac_a.hlmac == hlmac_b.hlmac
 
     @staticmethod
+    def hlmac_check_loop(hlmac_a, name):
+        """
+            Función para detectar bucles en una HLMAC a asignar 
+        """
+        return name in hlmac_a.hlmac
+
+    @staticmethod
     def hlmac_addr_print(addr):
         """
             Funcion para imprimir una HLMAC
