@@ -14,22 +14,19 @@ def main():
     positions = DataGatherer.getPositions('data/node_positions.csv')
 
     # Creamos la var del grafo para el primer instante
-    G = Graph(0, loads, edges, sw_edges)
+    G = Graph(0, loads, edges, sw_edges, root = '150')
 
     # Parseamos a NetworkX y pintamos el grafo
     G.plotGraph(positions, 'IEEE 123 Node test feeder - Graph')
 
-    # Lo ideal sería automatizar el proceso de poda del grafo de aquellos nodos virtuales que estén a modo de ampliación.
-    # De momento lo vamos a hacer a mano, ya que vamos mal de tiempo.
-    to_prune = ['250', '251', '350', '450', '451', '61', '610']
-    for nodes in to_prune:
-        G.removeNode(nodes)
+    # Podamos los nodos virtuales que estén a modo de ampliación.
+    G.pruneGraph()
 
     # Podemos vovler a pintar para comprobar la poda realziada
     G.plotGraph(positions, ' IEEE 123 Node test feeder - Pruned Graph')
 
     # Iniciamos el algoritmo
-    G_den2ne_alg = Den2ne(G, root='150')
+    G_den2ne_alg = Den2ne(G)
 
     # Primera fase: difusión de IDs
     G_den2ne_alg.spread_ids()
