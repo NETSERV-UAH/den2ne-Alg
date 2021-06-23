@@ -127,3 +127,46 @@ class Graph(object):
         # He estado a nada de meterme con threads y subprocesos con la librería de python de multiprocessing..
         # Mejor lo de dejamos así para ahorrar tiempo. Que sea el usuario quien decida cuando bloquear la ejecución..
         plt.show()
+
+    def pruneGraph(self, root):
+        """
+            Method to automagically prune the graph.
+
+            Args:
+                root (str): The ID of the root node.
+
+            Returns:
+                list: A list of the IDs of the nodes that have been pruned.
+        """
+
+        nodes_to_prune = {
+            'sweep_1': [],
+            'sweep_2': []
+        }
+
+        # First sweep
+        for node in self.nodes:
+            if (
+                node.type == Node.VIRTUAL and
+                node.name != root and
+                len(node.links) == 1 and
+                node.links[0].type == Link.SWITCH
+            ):
+                nodes_to_prune['sweep_1'].append(node.name)
+
+        for node in nodes_to_prune['sweep_1']:
+            self.removeNode(node)
+
+        # Second sweep
+        for node in self.nodes:
+            if (
+                node.type == Node.VIRTUAL and
+                len(node.links) == 1 and
+                node.links[0].type == Link.NORMAL
+            ):
+                nodes_to_prune['sweep_2'].append(node.name)
+
+        for node in nodes_to_prune['sweep_2']:
+            self.removeNode(node)
+
+        return nodes_to_prune['sweep_1'] + nodes_to_prune['sweep_2']
