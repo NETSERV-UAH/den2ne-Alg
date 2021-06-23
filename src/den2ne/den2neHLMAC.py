@@ -11,6 +11,7 @@ class HLMAC(object):
             Constructor de la clase HLMAC 
         """
         self.hlmac = HLMAC.hlmac_assign_address(hlmac_parent_addr, name)
+        self.used = False
 
     @staticmethod
     def hlmac_assign_address(hlmac_parent_addr, name):
@@ -24,7 +25,9 @@ class HLMAC(object):
             # Por ello, hay que llamar a copy()
             new_addr = hlmac_parent_addr.hlmac.copy()
 
-        return new_addr.append(name)
+        new_addr.append(name)
+
+        return new_addr
 
     @staticmethod
     def hlmac_cmp_address(hlmac_a, hlmac_b):

@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 
 from graph.graph import Graph
+from den2ne.den2neALG import Den2ne
 from dataCollector.dataCollector import DataGatherer
 
 
@@ -24,8 +25,14 @@ def main():
     for nodes in to_prune:
         G.removeNode(nodes)
 
+    # Podemos vovler a pintar para comprobar la poda realziada
     G.plotGraph(positions, ' IEEE 123 Node test feeder - Pruned Graph')
-    print('Ejecutamos mas cosas')
+
+    # Iniciamos el algoritmo
+    G_den2ne_alg = Den2ne(G, root='150')
+
+    # Primera fase: difusión de IDs
+    G_den2ne_alg.spread_ids()
 
     # Sacamos las figuras en modo iteractivo (Metodo que bloquea el flujo del script)
     G.showGraph()
