@@ -77,3 +77,25 @@ class Den2ne(object):
                 file.write('-------------------------------------------------------------------------')
                 file.write('-------------------------------------------------------------------------\n')
                 file.write('\n')
+    
+    def write_swConfig_report(self, filename):
+        """
+            Función que genera un fichero de log con el resultado de la config lógica de la red
+        """
+        with open(filename, 'w') as file:
+            for key in self.G.sw_config:
+                file.write('-------------------------------------------------------------------------\n')
+                file.write(f'| ID: {key}  | Node A: {self.G.sw_config[key]["node_a"]} | Node B: {self.G.sw_config[key]["node_b"]} | Status: {self.G.sw_config[key]["state"]}                    |\n')
+                file.write('-------------------------------------------------------------------------\n')
+                file.write('\n')
+    
+    def write_swConfig_CSV(self, filename):
+        """
+            Función que genera un fichero CSV con el resultado de la config lógica de la red
+        """
+        with open(filename, 'w') as file:
+            file.write('ID,Node A,Node B,State\n')
+            for key in self.G.sw_config:
+                file.write(f'{key},{self.G.sw_config[key]["node_a"]},{self.G.sw_config[key]["node_b"]},{self.G.sw_config[key]["state"]}\n')
+                
+                

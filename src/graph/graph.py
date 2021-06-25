@@ -17,6 +17,7 @@ class Graph(object):
         """
         self.nodes = list()
         self.root = root
+        self.sw_config = self.buildSwitchConfig(switches)
         self.buildGraph(delta, loads, edges, switches)
 
     def buildGraph(self, delta, loads, edges, switches):
@@ -49,6 +50,20 @@ class Graph(object):
         for sw_edge in switches:
             self.nodes[self.findNode(sw_edge["node_a"])[0]].addNeighbor(sw_edge["node_b"], Link.SWITCH, sw_edge["state"], 0, 3)
             self.nodes[self.findNode(sw_edge["node_b"])[0]].addNeighbor(sw_edge["node_a"], Link.SWITCH, sw_edge["state"], 0, 3)
+
+
+    def buildSwitchConfig(self, switch):
+        """
+            Función para procesar la configuración inicial de los enlaces switch
+        """
+        
+        # Nos creamos una variable auxiliar a devolver
+        sw_config = dict()
+
+        for sw_links in switch:
+            sw_config[switch.index(sw_links)] = sw_links
+
+        return sw_config
 
     def findNode(self, name):
         """
@@ -121,6 +136,7 @@ class Graph(object):
             self.removeNode(node)
 
         return nodes_to_prune['sweep_1'] + nodes_to_prune['sweep_2']
+
 
     def plotGraph(self, positions, title):
         """

@@ -11,6 +11,7 @@ class HLMAC(object):
             Constructor de la clase HLMAC 
         """
         self.hlmac = HLMAC.hlmac_assign_address(hlmac_parent_addr, name)
+        self.depends_on = list()
         self.used = False
 
     @staticmethod

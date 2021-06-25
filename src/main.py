@@ -14,7 +14,7 @@ def main():
     positions = DataGatherer.getPositions('data/node_positions.csv')
 
     # Creamos la var del grafo para el primer instante
-    G = Graph(0, loads, edges, sw_edges, root = '150')
+    G = Graph(0, loads, edges, sw_edges, root='150')
 
     # Parseamos a NetworkX y pintamos el grafo
     G.plotGraph(positions, 'IEEE 123 Node test feeder - Graph')
@@ -30,7 +30,13 @@ def main():
 
     # Primera fase: difusión de IDs
     G_den2ne_alg.spread_ids()
-    G_den2ne_alg.write_ids_report('results/report_ids.txt')
+
+    # Genearación de informes 
+    G_den2ne_alg.write_ids_report('results/reports/report_ids.txt')
+    G_den2ne_alg.write_swConfig_report('results/reports/report_swConfig.txt')
+
+    # Generamos la configuración logica en formato CSV para su posterior procesado en Matlab
+    G_den2ne_alg.write_swConfig_CSV('results/swConfig.csv')
 
     # Sacamos las figuras en modo iteractivo (Metodo que bloquea el flujo del script)
     G.showGraph()
