@@ -51,7 +51,7 @@ class Graph(object):
             self.nodes[self.findNode(sw_edge["node_a"])[0]].addNeighbor(sw_edge["node_b"], Link.SWITCH, sw_edge["state"], 0, 3)
             self.nodes[self.findNode(sw_edge["node_b"])[0]].addNeighbor(sw_edge["node_a"], Link.SWITCH, sw_edge["state"], 0, 3)
 
-
+    
     def buildSwitchConfig(self, switch):
         """
             Función para procesar la configuración inicial de los enlaces switch
@@ -76,6 +76,49 @@ class Graph(object):
 
         return None
 
+    def findSwitchID(self, name):
+        """
+            Función para buscar el index del enlace Switch dado el nombre de alguno de sus extremos
+        """
+        index = None
+
+        for key in self.sw_config:
+            if self.sw_config[key]['node_a'] == name or self.sw_config[key]['node_b'] == name:
+                index = key
+                break
+        
+        return index
+    
+
+    def getSwitchConfig(self, id):
+        """
+            Función para obtener el estado de un switch
+        """
+        return self.sw_config[id]['state']
+
+    def setSwitchConfig(self, id, state):
+        """
+            Función para establecer el estado de un enlace de tipo switch 
+        """
+
+        # Primero vamos a modificarlo en el dict que tenemos en la clase del grafo
+        self.sw_config[id]['state'] = state
+
+        # Acto seguido, debemos buscar los dos nodos que conforman el enlace y modificar sus Objs links para
+        # que la info de estado siga siendo coherente.
+
+        # Node A
+        node_a = self.findNode(self.sw_config[id]['node_a'])
+        self.nodes[node_a[0]].links[node_a[1].neighbors.index(self.sw_config[id]['node_b'])].state = state
+
+        # Node B
+        node_b = self.findNode(self.sw_config[id]['node_b'])
+        self.nodes[node_b[0]].links[node_b[1].neighbors.index(self.sw_config[id]['node_a'])].state = state
+
+        # Estos dos ultimos dos pasos si se va a eleiminar posteriormente uno de los nodos
+        # va da igual, ya que el obj link se va a eliminar.. Pero de esta forma, hacemos que el metodo
+        # sea robusto ante cualquier tipo de interacción
+
     def removeNode(self, name):
         """
             Funcion para eliminar un nodo del grafo
@@ -99,7 +142,7 @@ class Graph(object):
 
     def pruneGraph(self):
         """
-            Method to automagically prune the graph.
+            Method to automagically prune the graph and set the default status of pruned Switch links
 
             Returns:
                 list: A list of the IDs of the nodes that have been pruned.
@@ -119,6 +162,10 @@ class Graph(object):
                 node.links[0].type == Link.SWITCH
             ):
                 nodes_to_prune['sweep_1'].append(node.name)
+
+        # Lets open the switch links so that they dont consume anything
+        for node in nodes_to_prune['sweep_1']:
+            self.setSwitchConfig(self.findSwitchID(node), 'open')
 
         for node in nodes_to_prune['sweep_1']:
             self.removeNode(node)
