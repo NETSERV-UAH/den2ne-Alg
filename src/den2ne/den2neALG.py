@@ -23,8 +23,9 @@ class Den2ne(object):
         # Var aux: lista con los nodos que debemos visitar (Va a funcionar como una pila)
         nodes_to_attend = list()
 
-        # Empezamos por el root, como no tiene padre el root, su HLMAC parent addr es None -> No hereda
-        self.G.nodes[self.G.findNode(self.root)[0]].ids.append(HLMAC(None, self.root))
+        # Empezamos por el root, como no tiene padre el root, su HLMAC parent addr es None -> No hereda.
+        # además, no tiene ninguna dependencia (es decir no tiene ninguno enlace por delante de el de tipo switch)
+        self.G.nodes[self.G.findNode(self.root)[0]].ids.append(HLMAC(None, self.root, None))
 
         # El primero en ser visitado es el root
         nodes_to_attend.append(self.root)
@@ -47,8 +48,15 @@ class Den2ne(object):
                             pass
                         else:
                             # Si no hay bucles asignamos la ID al vecino
-                            self.G.nodes[self.G.findNode(neighbor)[0]].ids.append(HLMAC(curr_node[1].ids[i], neighbor))
-
+                            
+                            # Vamos a comprobar si la relación del nodo con el vecino viene dada por un enlace de tipo switch
+                            id_switch_node = self.G.findSwitchID(curr_node[1].name)
+                            id_switch_neighbor = self.G.findSwitchID(neighbor)
+                            if id_switch_node == id_switch_neighbor:
+                                self.G.nodes[self.G.findNode(neighbor)[0]].ids.append(HLMAC(curr_node[1].ids[i], neighbor, id_switch_node))
+                            else:
+                                self.G.nodes[self.G.findNode(neighbor)[0]].ids.append(HLMAC(curr_node[1].ids[i], neighbor, None))
+                                
                             # Registramos el vecino emn la pila para ser visitado más adelante
                             nodes_to_attend.append(neighbor)
 
