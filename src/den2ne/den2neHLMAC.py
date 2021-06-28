@@ -12,6 +12,7 @@ class HLMAC(object):
         """
         [self.hlmac, self.depends_on] = HLMAC.hlmac_assign_address(hlmac_parent_addr, name, dependency)
         self.used = False
+        self.active = False
 
     @staticmethod
     def hlmac_assign_address(hlmac_parent_addr, name, dependency):
