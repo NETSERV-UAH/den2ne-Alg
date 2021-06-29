@@ -34,6 +34,9 @@ def main():
     # Segunda fase: Decisión de IDs en base a un criterio
     G_den2ne_alg.selectBestIDs(Den2ne.CRITERION_NUM_HOPS)
 
+    # Tercera fase: Balance global de la red
+    total_balance = G_den2ne_alg.globalBalance_Ideal()
+
     # Genearación de informes
     G_den2ne_alg.write_ids_report('results/reports/report_ids.txt')
     G_den2ne_alg.write_swConfig_report('results/reports/report_swConfig.txt')

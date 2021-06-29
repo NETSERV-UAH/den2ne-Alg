@@ -14,6 +14,21 @@ class HLMAC(object):
         self.used = False
         self.active = False
 
+    def getOrigin(self):
+        """
+            Funcion para conseguir el origen de la HLMAC
+        """
+        return self.hlmac[-1]
+
+    def getNextHop(self):
+        """
+            Funcion para conseguir el siguiente salto de la HLMAC
+        """
+        ret_val = None
+        if len(self.hlmac) > 1:
+            ret_val = self.hlmac[-2]
+        return ret_val
+
     @staticmethod
     def hlmac_assign_address(hlmac_parent_addr, name, dependency):
         """
@@ -56,7 +71,7 @@ class HLMAC(object):
             Funcion para imprimir una HLMAC
         """
         return '.'.join(map(str, addr.hlmac))
-    
+
     @staticmethod
     def hlmac_deps_print(deps):
         """

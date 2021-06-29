@@ -115,6 +115,42 @@ class Den2ne(object):
             # Por ello, esa será la activa.
             self.G.nodes[self.G.nodes.index(node)].ids[lens.index(min(lens))].active = True
 
+    def globalBalance_Ideal(self):
+        """
+            Funcion que obtniene el balance global de la red y la dirección de cada enlace (hacia donde va el flujo de potencia)
+        """
+
+        # Primero hay que ordenar la lista de global_ids de mayor a menor
+        self.global_ids.sort(key=Den2ne.key_sort_by_HLMAC_len, reverse=True)
+
+        # Mientras haya IDs != del root -> Vamos a trabajar con listado global como si fuera una pila
+        while len(self.global_ids) > 1:
+
+            # Origen
+            [origin_index, origin] = self.G.findNode(self.global_ids[0].getOrigin())
+
+            # Destino
+            [dst_index, dst] = self.G.findNode(self.global_ids[0].getNextHop())
+
+            # Agregamos la carga de origen a destino
+            self.G.nodes[dst_index].load += origin.load
+
+            # Ajustamos a cero el valor de la carga en origen
+            self.G.nodes[origin_index].load = 0.0
+
+            # Una vez atendida la ID más larga de la lista, la desalojamos
+            self.global_ids.pop(0)
+
+        # Devolvemos el balance total
+        return self.G.findNode(self.root)[1].load
+
+    @staticmethod
+    def key_sort_by_HLMAC_len(id):
+        """
+            Función para key para ordenar el listado global de IDs en función de la longitud de las HLMACs 
+        """
+        return len(id.hlmac)
+
     def write_ids_report(self, filename):
         """
             Función que genera un fichero de log con el resultado de las asignaciones de las IDs
