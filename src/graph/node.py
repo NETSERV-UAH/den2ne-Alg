@@ -29,3 +29,16 @@ class Node(object):
         """
         self.neighbors.append(neighbor)
         self.links.append(Link(type_link, state, dist, cap))
+
+    def getActiveID(self):
+        """
+            Función para obtener el ID activo
+        """
+        ret_ID = None
+
+        for id in self.ids:
+            if id.active is True:
+                ret_ID = id
+                break
+
+        return ret_ID

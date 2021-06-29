@@ -7,6 +7,6 @@ ID,Node A,Node B,State
 5,150,149,closed
 6,250,251,open
 7,450,451,open
-8,54,94,open
-9,151,300,open
+8,54,94,closed
+9,151,300,closed
 10,300,350,open

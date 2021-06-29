@@ -8,11 +8,18 @@ class Den2ne(object):
         Clase para gestionar la lógica del algoritmo
     """
 
+    # Declaramos tipos de criterio para la decisión entre IDs
+    CRITERION_NUM_HOPS = 0
+    CRITERION_DISTANCE = 1
+    CRITERION_POWER_BALANCE = 2
+    CRITERION_POWER_BALANCE_WITH_LOSSES = 3
+
     def __init__(self, graft):
         """
             Constructor de la clase Den2ne 
         """
         self.G = graft
+        self.global_ids = list()
         self.root = graft.root
 
     def spread_ids(self):
@@ -48,7 +55,7 @@ class Den2ne(object):
                             pass
                         else:
                             # Si no hay bucles asignamos la ID al vecino
-                            
+
                             # Vamos a comprobar si la relación del nodo con el vecino viene dada por un enlace de tipo switch
                             id_switch_node = self.G.findSwitchID(curr_node[1].name)
                             id_switch_neighbor = self.G.findSwitchID(neighbor)
@@ -56,7 +63,7 @@ class Den2ne(object):
                                 self.G.nodes[self.G.findNode(neighbor)[0]].ids.append(HLMAC(curr_node[1].ids[i], neighbor, id_switch_node))
                             else:
                                 self.G.nodes[self.G.findNode(neighbor)[0]].ids.append(HLMAC(curr_node[1].ids[i], neighbor, None))
-                                
+
                             # Registramos el vecino emn la pila para ser visitado más adelante
                             nodes_to_attend.append(neighbor)
 
@@ -65,6 +72,48 @@ class Den2ne(object):
 
             # Por último desalojamos al nodo atendido
             nodes_to_attend.pop(0)
+
+    def collectActiveIDs(self):
+        """
+            Funcion que recoje en una variable global las IDs en uso para establecer el grafo elegido
+        """
+        for node in self.G.nodes:
+            self.global_ids.append(node.getActiveID())
+
+    def selectBestIDs(self, criterion):
+        """
+            Función para decidir la mejor ID de en nodo dado un criterio
+        """
+
+        # Vamos a elegir la mejor ID para cada nodo
+        if Den2ne.CRITERION_NUM_HOPS == criterion:
+            self.selectBestID_by_hops()
+        elif Den2ne.CRITERION_DISTANCE == criterion:
+            pass
+        elif Den2ne.CRITERION_POWER_BALANCE == criterion:
+            pass
+        elif Den2ne.CRITERION_POWER_BALANCE_WITH_LOSSES == criterion:
+            pass
+
+        # Una vez elegidas vamos a recoger las IDs activas de cada nodo
+        self.collectActiveIDs()
+
+        # Por último, vamos a ver el las dependencias con los switchs y activar aquellos que sean necesarios
+        dependences = list(set(sum([active_ids.depends_on for active_ids in self.global_ids], [])))
+
+        for deps in dependences:
+            self.G.setSwitchConfig(deps, 'closed')
+
+    def selectBestID_by_hops(self):
+        """
+            Función para decidir la mejor ID de un nodo por numero de saltos al root
+        """
+        for node in self.G.nodes:
+            lens = [len(id.hlmac) for id in node.ids]
+
+            # La ID con un menor tamaño será la ID con menor numero de saltos al root
+            # Por ello, esa será la activa.
+            self.G.nodes[self.G.nodes.index(node)].ids[lens.index(min(lens))].active = True
 
     def write_ids_report(self, filename):
         """
@@ -85,7 +134,7 @@ class Den2ne(object):
                 file.write('-------------------------------------------------------------------------')
                 file.write('-------------------------------------------------------------------------\n')
                 file.write('\n')
-    
+
     def write_swConfig_report(self, filename):
         """
             Función que genera un fichero de log con el resultado de la config lógica de la red
@@ -96,7 +145,7 @@ class Den2ne(object):
                 file.write(f'| ID: {key}  | Node A: {self.G.sw_config[key]["node_a"]} | Node B: {self.G.sw_config[key]["node_b"]} | Status: {self.G.sw_config[key]["state"]}                    |\n')
                 file.write('-------------------------------------------------------------------------\n')
                 file.write('\n')
-    
+
     def write_swConfig_CSV(self, filename):
         """
             Función que genera un fichero CSV con el resultado de la config lógica de la red
@@ -105,5 +154,3 @@ class Den2ne(object):
             file.write('ID,Node A,Node B,State\n')
             for key in self.G.sw_config:
                 file.write(f'{key},{self.G.sw_config[key]["node_a"]},{self.G.sw_config[key]["node_b"]},{self.G.sw_config[key]["state"]}\n')
-                
-                
