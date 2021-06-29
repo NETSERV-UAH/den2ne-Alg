@@ -28,7 +28,7 @@ class Node(object):
             Funcion para añadir un vecino
         """
         self.neighbors.append(neighbor)
-        self.links.append(Link(type_link, state, dist, cap))
+        self.links.append(Link(self.name, neighbor, type_link, state, dist, cap))
 
     def getActiveID(self):
         """

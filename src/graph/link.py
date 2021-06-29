@@ -13,10 +13,13 @@ class Link(object):
     VOLTAGE = 400  # Volts
     SWITCH_R = 0.1  # Ohms
 
-    def __init__(self, type_link, state, dist, cap):
+    def __init__(self, node_a, node_b, type_link, state, dist, cap):
         """
             Constructor de la clase Link
         """
+        self.node_a = node_a
+        self.node_b = node_b
+        self.direction = None
         self.type = type_link
         self.state = state
         self.dist = dist

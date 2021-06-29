@@ -132,6 +132,14 @@ class Den2ne(object):
             # Destino
             [dst_index, dst] = self.G.findNode(self.global_ids[0].getNextHop())
 
+            # Establecemos la dirección del flujo de potencia en el enlace
+            if origin.load < 0:
+                self.G.setLinkDirection(origin.name, dst.name, 'down')
+                self.G.setLinkDirection(dst.name, origin.name, 'up')
+            else:
+                self.G.setLinkDirection(origin.name, dst.name, 'up')
+                self.G.setLinkDirection(dst.name, origin.name, 'down')
+
             # Agregamos la carga de origen a destino
             self.G.nodes[dst_index].load += origin.load
 

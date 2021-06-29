@@ -1,5 +1,6 @@
 #!/usr/bin/python3
 
+from networkx.generators.directed import gn_graph
 from .node import Node
 from .link import Link
 import networkx as nx
@@ -51,12 +52,11 @@ class Graph(object):
             self.nodes[self.findNode(sw_edge["node_a"])[0]].addNeighbor(sw_edge["node_b"], Link.SWITCH, sw_edge["state"], 0, 3)
             self.nodes[self.findNode(sw_edge["node_b"])[0]].addNeighbor(sw_edge["node_a"], Link.SWITCH, sw_edge["state"], 0, 3)
 
-    
     def buildSwitchConfig(self, switch):
         """
             Función para procesar la configuración inicial de los enlaces switch
         """
-        
+
         # Nos creamos una variable auxiliar a devolver
         sw_config = dict()
 
@@ -86,9 +86,8 @@ class Graph(object):
             if self.sw_config[key]['node_a'] == name or self.sw_config[key]['node_b'] == name:
                 index = key
                 break
-        
+
         return index
-    
 
     def getSwitchConfig(self, id):
         """
@@ -118,6 +117,19 @@ class Graph(object):
         # Estos dos ultimos dos pasos si se va a eleiminar posteriormente uno de los nodos
         # va da igual, ya que el obj link se va a eliminar.. Pero de esta forma, hacemos que el metodo
         # sea robusto ante cualquier tipo de interacción
+
+    def setLinkDirection(self, node_a, node_b, direction):
+        """
+            Funcion para establecer la dirección de un enlace, es decir, hacia donde irá el flujo de potencia
+        """
+
+        # Si la dirección es "up", la potencia va de node_b al node_a
+
+        # Si por el contrario, la dirección es "down", la potencia va de node_a al node_b
+
+        # Node A
+        [Node_a_index, Node_a] = self.findNode(node_a)
+        self.nodes[Node_a_index].links[Node_a.neighbors.index(node_b)].direction = direction
 
     def removeNode(self, name):
         """
@@ -184,7 +196,6 @@ class Graph(object):
 
         return nodes_to_prune['sweep_1'] + nodes_to_prune['sweep_2']
 
-
     def plotGraph(self, positions, title):
         """
             Funcion para pintar el grafo
@@ -217,6 +228,46 @@ class Graph(object):
         nx.draw_networkx_edges(G_nx, pos, edgelist=edge_normal, width=2)
         nx.draw_networkx_edges(G_nx, pos, edgelist=edge_switch_open, width=2, alpha=0.5, edge_color="g", style="dashed")
         nx.draw_networkx_edges(G_nx, pos, edgelist=edge_switch_closed, width=2, alpha=0.5, edge_color="r", style="dashed")
+        nx.draw_networkx_labels(G_nx, pos, font_size=10, font_family="sans-serif")
+
+        plt.axis("off")
+        plt.title(title)
+        plt.plot()
+
+    def plotDiGraph(self, positions, title):
+        """
+            Funcion para pintar el grafo dirigido
+        """
+        G_nx = nx.Graph()
+        G_nx = G_nx.to_directed()
+
+        color_map = []
+
+        for node in self.nodes:
+            for link in node.links:
+                G_nx.add_edge(
+                    node.name, node.neighbors[node.links.index(link)], type_link=link.type, status=link.state, direction=link.direction)
+
+        edge_normal = [(u, v) for (u, v, d) in G_nx.edges(data=True) if d["type_link"] == Link.NORMAL and d["direction"] == 'up']
+        edge_switch_open = [(u, v) for (u, v, d) in G_nx.edges(data=True) if d["type_link"] == Link.SWITCH and d["status"] == 'open' and d["direction"] == 'up']
+        edge_switch_closed = [(u, v) for (u, v, d) in G_nx.edges(data=True) if d["type_link"] == Link.SWITCH and d["status"] == 'closed' and d["direction"] == 'up']
+
+        pos = nx.spring_layout(G_nx, k=0.2)
+
+        for position in positions:
+            pos[position["node"]] = (position["x"], -position["y"])
+
+        for node in G_nx:
+            if self.findNode(node)[1].type == Node.NORMAL:
+                color_map.append('#19affa')
+            else:
+                color_map.append('#95e8d6')
+
+        fig = plt.figure()
+        nx.draw_networkx_nodes(G_nx, pos, node_color=color_map, node_size=270)
+        nx.draw_networkx_edges(G_nx, pos, edgelist=edge_normal, width=2)
+        nx.draw_networkx_edges(G_nx, pos, edgelist=edge_switch_open, width=2, alpha=0.7, edge_color="g", style="dashed")
+        nx.draw_networkx_edges(G_nx, pos, edgelist=edge_switch_closed, width=2, alpha=0.7,  edge_color="r", style="dashed")
         nx.draw_networkx_labels(G_nx, pos, font_size=10, font_family="sans-serif")
 
         plt.axis("off")
