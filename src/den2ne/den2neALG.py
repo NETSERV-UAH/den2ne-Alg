@@ -68,7 +68,7 @@ class Den2ne(object):
                             nodes_to_attend.append(neighbor)
 
                     # Y tenemos que marcar la HLMAC como que ya ha sido usada
-                    self.G.nodes[self.G.findNode(nodes_to_attend[0])[0]].ids[i].used = True
+                    self.G.nodes[curr_node[0]].ids[i].used = True
 
             # Por último desalojamos al nodo atendido
             nodes_to_attend.pop(0)
