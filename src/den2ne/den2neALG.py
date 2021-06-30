@@ -89,10 +89,13 @@ class Den2ne(object):
         # Vamos a elegir la mejor ID para cada nodo
         if Den2ne.CRITERION_NUM_HOPS == criterion:
             self.selectBestID_by_hops()
+
         elif Den2ne.CRITERION_DISTANCE == criterion:
             self.selectBestID_by_distance()
+
         elif Den2ne.CRITERION_POWER_BALANCE == criterion:
-            pass
+            self.selectBestID_by_balance()
+
         elif Den2ne.CRITERION_POWER_BALANCE_WITH_LOSSES == criterion:
             pass
 
@@ -134,6 +137,25 @@ class Den2ne(object):
             distances += self.G.findNode(id.hlmac[i])[1].links[self.G.findNode(id.hlmac[i])[1].neighbors.index(id.hlmac[i+1])].dist
 
         return distances
+    
+    def selectBestID_by_balance(self):
+        """
+            Función para decidir la mejor ID de un nodo por balance de potencia al root
+        """
+        for node in self.G.nodes:
+            balances = [self.getTotalBalance(id) for id in node.ids]
+
+            self.G.nodes[self.G.nodes.index(node)].ids[balances.index(max(balances))].active = True
+
+    def getTotalBalance(self, id):
+        """
+            Funcion para calcular el balance de potencias total de una HLMAC
+        """
+        balance = 0
+        for i in range(0, len(id.hlmac)):
+            balance += self.G.findNode(id.hlmac[i])[1].load
+        
+        return balance
 
     def globalBalance_Ideal(self):
         """
