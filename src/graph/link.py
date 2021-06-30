@@ -48,12 +48,25 @@ class Link(object):
         """
         return meters * 3.28084
 
+    def getLosses(self, Pin):
+        """
+            Función para calcular las perdidas de un enlace de forma agnostica
+        """
+        Loss = 0.0   # kW
+
+        if self.type == Link.SWITCH:
+            Loss = Link.getLosses_Switch(Pin)
+        else:
+            Loss = self.getLosses_Link(Pin)
+
+        return Loss
+
     @staticmethod
     def getLosses_Switch(P_in):
         """
             Función para calcular las perdidas de inserción por un switch activo dada una Potencia incidente (kW - Kilowatts)
         """
-        return (((Link.SWITCH_R)/(Link.VOLTAGE)**2) * (P_in)**2)
+        return ((((Link.SWITCH_R)/(Link.VOLTAGE)**2) * (P_in*1000)**2)/1000)
 
     def getLosses_Link(self, P_in):
         """
@@ -62,4 +75,4 @@ class Link(object):
 
         r_eff = self.coef_R * (Link.ft2meters(self.dist)/1000)  # El coef_R esta en ohms/km -> la distancia nos venía en fts
 
-        return (((r_eff)/(Link.VOLTAGE)**2) * (P_in)**2)
+        return ((((r_eff)/(Link.VOLTAGE)**2) * (P_in*1000)**2)/1000)

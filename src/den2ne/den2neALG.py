@@ -97,7 +97,7 @@ class Den2ne(object):
             self.selectBestID_by_balance()
 
         elif Den2ne.CRITERION_POWER_BALANCE_WITH_LOSSES == criterion:
-            pass
+            self.selectBestID_by_balance_with_Losses()
 
         # Una vez elegidas vamos a recoger las IDs activas de cada nodo
         self.collectActiveIDs()
@@ -154,6 +154,30 @@ class Den2ne(object):
         balance = 0
         for i in range(0, len(id.hlmac)):
             balance += self.G.findNode(id.hlmac[i])[1].load
+        
+        return balance
+
+    def selectBestID_by_balance_with_Losses(self):
+        """
+            Función para decidir la mejor ID de un nodo por balance de potencia al root con perdidas
+        """
+        for node in self.G.nodes:
+            balances = [self.getTotalBalance_with_Losses(id) for id in node.ids]
+
+            self.G.nodes[self.G.nodes.index(node)].ids[balances.index(max(balances))].active = True
+
+    def getTotalBalance_with_Losses(self, id):
+        """
+            Funcion para calcular el balance de potencias total de una HLMAC con perdidas
+        """
+        balance = 0
+        for i in range(len(id.hlmac)-1, 0, -1):
+            curr_node = self.G.findNode(id.hlmac[i])
+
+            if i != 0:
+                balance += (curr_node[1].load - curr_node[1].links[curr_node[1].neighbors.index(id.hlmac[i-1])].getLosses(curr_node[1].load + balance))
+            else:
+                balance += curr_node[1].load
         
         return balance
 
