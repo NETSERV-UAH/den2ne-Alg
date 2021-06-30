@@ -13,7 +13,7 @@ class Link(object):
     VOLTAGE = 400  # Volts
     SWITCH_R = 0.1  # Ohms
 
-    def __init__(self, node_a, node_b, type_link, state, dist, cap):
+    def __init__(self, node_a, node_b, type_link, state, dist, conf, coef_r, i_max):
         """
             Constructor de la clase Link
         """
@@ -23,8 +23,16 @@ class Link(object):
         self.type = type_link
         self.state = state
         self.dist = dist
-        self.cap = cap
-        self.coef_R = 1  # Ohms/km (De momento, no lo tenemos)
+        self.conf = conf
+        
+        # Según nos han indicado los enlaces de tipo switch no tienen dist, cap 
+        if self.type != Link.SWITCH:
+            self.capacity = (i_max * Link.VOLTAGE)/1000   # kW
+            self.coef_R = coef_r                          # Ohms/km 
+        else:
+            self.capacity = None
+            self.coef_R = None
+
 
     @staticmethod
     def ft2meters(fts):

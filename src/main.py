@@ -10,11 +10,12 @@ def main():
     # Recolectamos los datos
     loads = DataGatherer.getLoads('data/loads.csv', 3)
     edges = DataGatherer.getEdges('data/links.csv')
+    edges_conf = DataGatherer.getEdges_Config('data/links_config.csv')
     sw_edges = DataGatherer.getSwitches('data/switches.csv')
     positions = DataGatherer.getPositions('data/node_positions.csv')
 
     # Creamos la var del grafo para el primer instante
-    G = Graph(0, loads, edges, sw_edges, root='150')
+    G = Graph(0, loads, edges, sw_edges, edges_conf, root='150')
 
     # Parseamos a NetworkX y pintamos el grafo
     G.plotGraph(positions, 'IEEE 123 Node test feeder - Graph')

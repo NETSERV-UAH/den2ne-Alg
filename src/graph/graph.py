@@ -12,16 +12,16 @@ class Graph(object):
         Clase para gestionar el gráfo que representará la red de distribución eléctrica
     """
 
-    def __init__(self, delta, loads, edges, switches, root='150'):
+    def __init__(self, delta, loads, edges, switches, edges_conf, root='150'):
         """
             Constructor de la clase Graph el cual conformará el grafo a partir de los datos procesados.
         """
         self.nodes = list()
         self.root = root
         self.sw_config = self.buildSwitchConfig(switches)
-        self.buildGraph(delta, loads, edges, switches)
+        self.buildGraph(delta, loads, edges, switches, edges_conf)
 
-    def buildGraph(self, delta, loads, edges, switches):
+    def buildGraph(self, delta, loads, edges, switches, edges_conf):
         """
             Función para generar el grafo
         """
@@ -45,12 +45,14 @@ class Graph(object):
 
         # A continuación, vamos a añadir a los nodos sus vecinos. Cada enlace es bi-direccional.
         for edge in edges:
-            self.nodes[(self.findNode(edge["node_a"])[0])].addNeighbor(edge["node_b"], Link.NORMAL, 'closed', edge["dist"], edge["cap"])
-            self.nodes[(self.findNode(edge["node_b"])[0])].addNeighbor(edge["node_a"], Link.NORMAL, 'closed', edge["dist"], edge["cap"])
+            self.nodes[(self.findNode(edge["node_a"])[0])].addNeighbor(edge["node_b"], Link.NORMAL, 'closed',
+                                                                       edge["dist"], edge["conf"], edges_conf[edge["conf"]]["coef_r"], edges_conf[edge["conf"]]["i_max"])
+            self.nodes[(self.findNode(edge["node_b"])[0])].addNeighbor(edge["node_a"], Link.NORMAL, 'closed',
+                                                                       edge["dist"], edge["conf"], edges_conf[edge["conf"]]["coef_r"], edges_conf[edge["conf"]]["i_max"])
 
         for sw_edge in switches:
-            self.nodes[self.findNode(sw_edge["node_a"])[0]].addNeighbor(sw_edge["node_b"], Link.SWITCH, sw_edge["state"], 0, 3)
-            self.nodes[self.findNode(sw_edge["node_b"])[0]].addNeighbor(sw_edge["node_a"], Link.SWITCH, sw_edge["state"], 0, 3)
+            self.nodes[self.findNode(sw_edge["node_a"])[0]].addNeighbor(sw_edge["node_b"], Link.SWITCH, sw_edge["state"], 0, 0, 0, 0)
+            self.nodes[self.findNode(sw_edge["node_b"])[0]].addNeighbor(sw_edge["node_a"], Link.SWITCH, sw_edge["state"], 0, 0, 0, 0)
 
     def buildSwitchConfig(self, switch):
         """

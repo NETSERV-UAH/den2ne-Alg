@@ -46,7 +46,7 @@ class DataGatherer(object):
                 for row in reader:
                     if lines >= 3:
                         edges.append(
-                            {"node_a": row[0], "node_b": row[1], "dist": int(row[2]), "cap": int(row[3])})
+                            {"node_a": row[0], "node_b": row[1], "dist": int(row[2]), "conf": int(row[3])})
                     lines += 1
 
         except Exception as e:
@@ -110,8 +110,7 @@ class DataGatherer(object):
                 lines = 0
                 for row in reader:
                     if lines != 0:
-                        loads[row[0]] = [round(float(load), threshold)
-                                         for load in row[1:]]
+                        confs[int(row[0])] = {"coef_r": float(row[1]), "i_max": float(row[2]), "section": row[3]}
                     lines += 1
 
         except Exception as e:
