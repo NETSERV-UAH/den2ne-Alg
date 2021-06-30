@@ -15,13 +15,13 @@ class Den2ne(object):
     CRITERION_POWER_BALANCE = 2
     CRITERION_POWER_BALANCE_WITH_LOSSES = 3
 
-    def __init__(self, graft):
+    def __init__(self, graph):
         """
             Constructor de la clase Den2ne 
         """
-        self.G = graft
+        self.G = graph
         self.global_ids = list()
-        self.root = graft.root
+        self.root = graph.root
 
     def spread_ids(self):
         """
