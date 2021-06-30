@@ -95,3 +95,26 @@ class DataGatherer(object):
             print(str(e))
 
         return postions
+
+    @staticmethod
+    def getEdges_Config(filename):
+        """
+            Funcion para recolectar las configuraciones de los enlaces
+        """
+
+        confs = dict()
+
+        try:
+            with open(filename, 'r') as file:
+                reader = csv.reader(file)
+                lines = 0
+                for row in reader:
+                    if lines != 0:
+                        loads[row[0]] = [round(float(load), threshold)
+                                         for load in row[1:]]
+                    lines += 1
+
+        except Exception as e:
+            print(str(e))
+
+        return confs
