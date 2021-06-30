@@ -1,5 +1,6 @@
 #!/usr/bin/python3
 
+from numpy.lib.function_base import append
 from .den2neHLMAC import HLMAC
 
 
@@ -89,7 +90,7 @@ class Den2ne(object):
         if Den2ne.CRITERION_NUM_HOPS == criterion:
             self.selectBestID_by_hops()
         elif Den2ne.CRITERION_DISTANCE == criterion:
-            pass
+            self.selectBestID_by_distance()
         elif Den2ne.CRITERION_POWER_BALANCE == criterion:
             pass
         elif Den2ne.CRITERION_POWER_BALANCE_WITH_LOSSES == criterion:
@@ -114,6 +115,25 @@ class Den2ne(object):
             # La ID con un menor tamaño será la ID con menor numero de saltos al root
             # Por ello, esa será la activa.
             self.G.nodes[self.G.nodes.index(node)].ids[lens.index(min(lens))].active = True
+
+    def selectBestID_by_distance(self):
+        """
+            Función para decidir la mejor ID de un nodo por distancia al root
+        """
+        for node in self.G.nodes:
+            dists = [self.getTotalDistance(id) for id in node.ids]
+
+            self.G.nodes[self.G.nodes.index(node)].ids[dists.index(min(dists))].active = True
+
+    def getTotalDistance(self, id):
+        """
+            Funcion para calcular la distancia total de una HLMAC
+        """
+        distances = 0
+        for i in range(0, len(id.hlmac)-1):
+            distances += self.G.findNode(id.hlmac[i])[1].links[self.G.findNode(id.hlmac[i])[1].neighbors.index(id.hlmac[i+1])].dist
+
+        return distances
 
     def globalBalance_Ideal(self):
         """
