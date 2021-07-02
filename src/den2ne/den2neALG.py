@@ -109,6 +109,10 @@ class Den2ne(object):
         # Por último, vamos a ver el las dependencias con los switchs y activar aquellos que sean necesarios
         dependences = list(set(sum([active_ids.depends_on for active_ids in self.global_ids], [])))
 
+        for sw in self.G.sw_config:
+            if not self.G.sw_config[sw]["pruned"]:
+                self.G.setSwitchConfig(sw, 'open')
+
         for deps in dependences:
             self.G.setSwitchConfig(deps, 'closed')
 
@@ -217,6 +221,9 @@ class Den2ne(object):
         # Primero hay que ordenar la lista de global_ids de mayor a menor
         self.global_ids.sort(key=Den2ne.key_sort_by_HLMAC_len, reverse=True)
 
+        # Vamos a estudiar tambien el abs() del movimiento de flujo de Potencia
+        abs_flux = 0.0
+
         # Mientras haya IDs != del root -> Vamos a trabajar con listado global como si fuera una pila
         while len(self.global_ids) > 1:
 
@@ -240,6 +247,9 @@ class Den2ne(object):
             else:
                 self.G.nodes[dst_index].load += origin.load
 
+            # Actualizamos el flujo absoluto
+            abs_flux += abs(origin.load)
+
             # Ajustamos a cero el valor de la carga en origen
             self.G.nodes[origin_index].load = 0.0
 
@@ -247,7 +257,7 @@ class Den2ne(object):
             self.global_ids.pop(0)
 
         # Devolvemos el balance total
-        return self.G.findNode(self.root)[1].load
+        return [self.G.findNode(self.root)[1].load, abs_flux]
 
     @ staticmethod
     def key_sort_by_HLMAC_len(id):
@@ -255,6 +265,30 @@ class Den2ne(object):
             Función para key para ordenar el listado global de IDs en función de la longitud de las HLMACs
         """
         return len(id.hlmac)
+
+    def updateLoads(self, loads, delta):
+        """
+            Funcion para actualizar las cargas de los nodos del grafo
+        """
+
+        # Como solo tenemos las cargas de los nodos normales, vamos a poner a 0 todos y establecer las cargas de los normales
+        for i in range(0, len(self.G.nodes)):
+            if self.G.nodes[i].name in loads:
+                self.G.nodes[i].load = loads[self.G.nodes[i].name][delta]
+            else:
+                self.G.nodes[i].load = 0
+
+    def clearSelectedIDs(self):
+        """
+            Función para borrar el flag de active de todas las IDs de cada nodo
+        """
+        # Limpiamos las IDs globales
+        self.global_ids = list()
+
+        # De esta forma podemos volver a tomar una función objetivo
+        for i in range(0, len(self.G.nodes)):
+            for j in range(0, len(self.G.nodes[i].ids)):
+                self.G.nodes[i].ids[j].active = False
 
     def write_ids_report(self, filename):
         """

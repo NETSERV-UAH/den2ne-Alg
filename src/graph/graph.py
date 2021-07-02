@@ -64,6 +64,7 @@ class Graph(object):
 
         for sw_links in switch:
             sw_config[switch.index(sw_links)] = sw_links
+            sw_config[switch.index(sw_links)]["pruned"] = False
 
         return sw_config
 
@@ -97,13 +98,17 @@ class Graph(object):
         """
         return self.sw_config[id]['state']
 
-    def setSwitchConfig(self, id, state):
+    def setSwitchConfig(self, id, state, pruned=None):
         """
             Función para establecer el estado de un enlace de tipo switch 
         """
 
         # Primero vamos a modificarlo en el dict que tenemos en la clase del grafo
         self.sw_config[id]['state'] = state
+
+        # Si se debe a una poda
+        if pruned is not None:
+            self.sw_config[id]['pruned'] = True
 
         # Acto seguido, debemos buscar los dos nodos que conforman el enlace y modificar sus Objs links para
         # que la info de estado siga siendo coherente.
@@ -179,7 +184,7 @@ class Graph(object):
 
         # Lets open the switch links so that they dont consume anything
         for node in nodes_to_prune['sweep_1']:
-            self.setSwitchConfig(self.findSwitchID(node), 'open')
+            self.setSwitchConfig(self.findSwitchID(node), 'open', 'pruned')
 
         for node in nodes_to_prune['sweep_1']:
             self.removeNode(node)
