@@ -137,6 +137,21 @@ class Graph(object):
         # Node A
         [Node_a_index, Node_a] = self.findNode(node_a)
         self.nodes[Node_a_index].links[Node_a.neighbors.index(node_b)].direction = direction
+    
+    def getLinkCapacity(self, node_a, node_b):
+        """
+            Función para obtener la capacidad del enlace conformado por node_a y node_b 
+        """
+        ret_cap = None
+
+        # Vamos al nodo A, y miramos el enlace con el vecino node_b
+        [Node_a_index, Node_a] = self.findNode(node_a)
+
+        # Si el enlace es de tipo switch.. no hay capacidad
+        if self.nodes[Node_a_index].links[Node_a.neighbors.index(node_b)].type == Link.NORMAL:
+            ret_cap = self.nodes[Node_a_index].links[Node_a.neighbors.index(node_b)].capacity
+        
+        return ret_cap
 
     def removeNode(self, name):
         """

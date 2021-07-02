@@ -224,6 +224,9 @@ class Den2ne(object):
         # Vamos a estudiar tambien el abs() del movimiento de flujo de Potencia
         abs_flux = 0.0
 
+        # Vamos tambien a prestar atencion a la capacidad
+        cap = 0.0
+
         # Mientras haya IDs != del root -> Vamos a trabajar con listado global como si fuera una pila
         while len(self.global_ids) > 1:
 
@@ -241,14 +244,33 @@ class Den2ne(object):
                 self.G.setLinkDirection(origin.name, dst.name, 'up')
                 self.G.setLinkDirection(dst.name, origin.name, 'down')
 
+            cap = self.G.getLinkCapacity(origin.name, dst.name)
+            
             # Agregamos la carga de origen a destino
             if withLosses:
-                self.G.nodes[dst_index].load += origin.load - origin.links[origin.neighbors.index(dst.name)].getLosses(origin.load)
-            else:
-                self.G.nodes[dst_index].load += origin.load
+                if  cap is not None and cap >=  origin.load:
+                    self.G.nodes[dst_index].load += origin.load - origin.links[origin.neighbors.index(dst.name)].getLosses(origin.load)
+                
+                    # Actualizamos el flujo absoluto
+                    abs_flux += abs(origin.load - origin.links[origin.neighbors.index(dst.name)].getLosses(origin.load))
+                    
+                else:
+                    self.G.nodes[dst_index].load += cap - origin.links[origin.neighbors.index(dst.name)].getLosses(cap)
 
-            # Actualizamos el flujo absoluto
-            abs_flux += abs(origin.load)
+                    # Actualizamos el flujo absoluto
+                    abs_flux += abs(cap - origin.links[origin.neighbors.index(dst.name)].getLosses(cap))
+            else:
+                if  cap is not None and cap >=  origin.load:
+                    self.G.nodes[dst_index].load += origin.load
+                    
+                    # Actualizamos el flujo absoluto
+                    abs_flux += abs(origin.load)
+                else:
+                    self.G.nodes[dst_index].load += cap 
+
+                    # Actualizamos el flujo absoluto
+                    abs_flux += abs(cap)
+            
 
             # Ajustamos a cero el valor de la carga en origen
             self.G.nodes[origin_index].load = 0.0
