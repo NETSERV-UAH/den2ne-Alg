@@ -14,10 +14,11 @@ class Den2ne(object):
     CRITERION_DISTANCE = 1
     CRITERION_POWER_BALANCE = 2
     CRITERION_POWER_BALANCE_WITH_LOSSES = 3
+    CRITERION_LINKS_LOSSES = 4
 
     def __init__(self, graph):
         """
-            Constructor de la clase Den2ne 
+            Constructor de la clase Den2ne
         """
         self.G = graph
         self.global_ids = list()
@@ -99,6 +100,9 @@ class Den2ne(object):
         elif Den2ne.CRITERION_POWER_BALANCE_WITH_LOSSES == criterion:
             self.selectBestID_by_balance_with_Losses()
 
+        elif Den2ne.CRITERION_LINKS_LOSSES == criterion:
+            self.selectBestID_by_Links_Losses()
+
         # Una vez elegidas vamos a recoger las IDs activas de cada nodo
         self.collectActiveIDs()
 
@@ -179,9 +183,35 @@ class Den2ne(object):
 
         return balance
 
-    def globalBalance_Ideal(self):
+    def selectBestID_by_Links_Losses(self):
         """
-            Funcion que obtniene el balance global de la red y la dirección de cada enlace (hacia donde va el flujo de potencia)
+            Función para decidir la mejor ID de un nodo en función de sus perdidas al root
+        """
+        for node in self.G.nodes:
+            losses = [self.getTotalLinks_Losses(id) for id in node.ids]
+
+            self.G.nodes[self.G.nodes.index(node)].ids[losses.index(min(losses))].active = True
+
+    def getTotalLinks_Losses(self, id):
+        """
+            Funcion para calcular las perdidas desde un nodo dado al root
+        """
+
+        init_node = self.G.findNode(id.hlmac[len(id.hlmac)-1])
+        curr_load = init_node[1].load
+        losses = 0
+
+        for i in range(len(id.hlmac)-1, 0, -1):
+            curr_node = self.G.findNode(id.hlmac[i])
+
+            losses += curr_node[1].links[curr_node[1].neighbors.index(id.hlmac[i-1])].getLosses(curr_load)
+            curr_load -= losses
+
+        return losses
+
+    def globalBalance(self, withLosses):
+        """
+            Funcion que obtniene el balance global de la red y la dirección de cada enlace (hacia donde va el flujo de potencia) 
         """
 
         # Primero hay que ordenar la lista de global_ids de mayor a menor
@@ -205,7 +235,10 @@ class Den2ne(object):
                 self.G.setLinkDirection(dst.name, origin.name, 'down')
 
             # Agregamos la carga de origen a destino
-            self.G.nodes[dst_index].load += origin.load
+            if withLosses:
+                self.G.nodes[dst_index].load += origin.load - origin.links[origin.neighbors.index(dst.name)].getLosses(origin.load)
+            else:
+                self.G.nodes[dst_index].load += origin.load
 
             # Ajustamos a cero el valor de la carga en origen
             self.G.nodes[origin_index].load = 0.0
@@ -216,10 +249,10 @@ class Den2ne(object):
         # Devolvemos el balance total
         return self.G.findNode(self.root)[1].load
 
-    @staticmethod
+    @ staticmethod
     def key_sort_by_HLMAC_len(id):
         """
-            Función para key para ordenar el listado global de IDs en función de la longitud de las HLMACs 
+            Función para key para ordenar el listado global de IDs en función de la longitud de las HLMACs
         """
         return len(id.hlmac)
 
