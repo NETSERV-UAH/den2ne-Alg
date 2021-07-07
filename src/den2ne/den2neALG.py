@@ -248,28 +248,36 @@ class Den2ne(object):
 
             # Agregamos la carga de origen a destino
             if withLosses:
-                if cap is None or cap >= origin.load:
-                    self.G.nodes[dst_index].load += origin.load - origin.links[origin.neighbors.index(dst.name)].getLosses(origin.load)
+                # if cap is None or cap >= origin.load:
+                #     self.G.nodes[dst_index].load += origin.load - origin.links[origin.neighbors.index(dst.name)].getLosses(origin.load)
+                    
+                #     # Actualizamos el flujo absoluto
+                #     abs_flux += abs(origin.load - origin.links[origin.neighbors.index(dst.name)].getLosses(origin.load))
 
-                    # Actualizamos el flujo absoluto
-                    abs_flux += abs(origin.load - origin.links[origin.neighbors.index(dst.name)].getLosses(origin.load))
+                # else:
+                #     self.G.nodes[dst_index].load += cap - origin.links[origin.neighbors.index(dst.name)].getLosses(cap)
 
-                else:
-                    self.G.nodes[dst_index].load += cap - origin.links[origin.neighbors.index(dst.name)].getLosses(cap)
-
-                    # Actualizamos el flujo absoluto
-                    abs_flux += abs(cap - origin.links[origin.neighbors.index(dst.name)].getLosses(cap))
+                #     # Actualizamos el flujo absoluto
+                #     abs_flux += abs(cap - origin.links[origin.neighbors.index(dst.name)].getLosses(cap))
+                self.G.nodes[dst_index].load += origin.load - origin.links[origin.neighbors.index(dst.name)].getLosses(origin.load)
+                    
+                # Actualizamos el flujo absoluto
+                abs_flux += abs(origin.load - origin.links[origin.neighbors.index(dst.name)].getLosses(origin.load))
             else:
-                if cap is None or cap >= origin.load:
-                    self.G.nodes[dst_index].load += origin.load
+                # if cap is None or cap >= origin.load:
+                #     self.G.nodes[dst_index].load += origin.load
 
-                    # Actualizamos el flujo absoluto
-                    abs_flux += abs(origin.load)
-                else:
-                    self.G.nodes[dst_index].load += cap
+                #     # Actualizamos el flujo absoluto
+                #     abs_flux += abs(origin.load)
+                # else:
+                #     self.G.nodes[dst_index].load += cap
 
-                    # Actualizamos el flujo absoluto
-                    abs_flux += abs(cap)
+                #     # Actualizamos el flujo absoluto
+                #     abs_flux += abs(cap)
+                self.G.nodes[dst_index].load += origin.load
+
+                # Actualizamos el flujo absoluto
+                abs_flux += abs(origin.load)
 
             # Ajustamos a cero el valor de la carga en origen
             self.G.nodes[origin_index].load = 0.0
@@ -330,6 +338,28 @@ class Den2ne(object):
                 file.write('-------------------------------------------------------------------------')
                 file.write('-------------------------------------------------------------------------\n')
                 file.write('\n')
+
+    def write_loads_report(self, filename):
+        """
+            Función que genera un fichero de log con el resultado de las asignaciones de carga
+        """
+        with open(filename, 'w') as file:
+            for node in self.G.nodes:
+                file.write('-------------------------------------------------------------------------')
+                file.write('-------------------------------------------------------------------------\n')
+                file.write(f'| Node: {node.name}  | Type: {node.type} | Neighbors: {len(node.neighbors)} | Load: {node.load} \n')
+                file.write('-------------------------------------------------------------------------')
+                file.write('-------------------------------------------------------------------------\n')
+                file.write('|    Flag    |  ID                                                              \n')
+                file.write('-------------------------------------------------------------------------')
+                file.write('-------------------------------------------------------------------------\n')
+                for id in node.ids:
+                    file.write(
+                        f'|     {int(id.active)}     |  {HLMAC.hlmac_addr_print(id)} \n')
+                file.write('-------------------------------------------------------------------------')
+                file.write('-------------------------------------------------------------------------\n')
+                file.write('\n')
+
 
     def write_swConfig_report(self, filename):
         """
