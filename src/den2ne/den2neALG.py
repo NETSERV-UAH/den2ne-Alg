@@ -245,32 +245,31 @@ class Den2ne(object):
                 self.G.setLinkDirection(dst.name, origin.name, 'down')
 
             cap = self.G.getLinkCapacity(origin.name, dst.name)
-            
+
             # Agregamos la carga de origen a destino
             if withLosses:
-                if  cap is not None and cap >=  origin.load:
+                if cap is None or cap >= origin.load:
                     self.G.nodes[dst_index].load += origin.load - origin.links[origin.neighbors.index(dst.name)].getLosses(origin.load)
-                
+
                     # Actualizamos el flujo absoluto
                     abs_flux += abs(origin.load - origin.links[origin.neighbors.index(dst.name)].getLosses(origin.load))
-                    
+
                 else:
                     self.G.nodes[dst_index].load += cap - origin.links[origin.neighbors.index(dst.name)].getLosses(cap)
 
                     # Actualizamos el flujo absoluto
                     abs_flux += abs(cap - origin.links[origin.neighbors.index(dst.name)].getLosses(cap))
             else:
-                if  cap is not None and cap >=  origin.load:
+                if cap is None or cap >= origin.load:
                     self.G.nodes[dst_index].load += origin.load
-                    
+
                     # Actualizamos el flujo absoluto
                     abs_flux += abs(origin.load)
                 else:
-                    self.G.nodes[dst_index].load += cap 
+                    self.G.nodes[dst_index].load += cap
 
                     # Actualizamos el flujo absoluto
                     abs_flux += abs(cap)
-            
 
             # Ajustamos a cero el valor de la carga en origen
             self.G.nodes[origin_index].load = 0.0

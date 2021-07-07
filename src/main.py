@@ -33,7 +33,7 @@ def main():
     G_den2ne_alg.spread_ids()
 
     # Segunda fase: Decisión de IDs en base a un criterio
-    G_den2ne_alg.selectBestIDs(Den2ne.CRITERION_POWER_BALANCE)
+    G_den2ne_alg.selectBestIDs(Den2ne.CRITERION_NUM_HOPS)
 
     # Tercera fase: Balance global de la red y establece los flujos de potencia
     [total_balance_ideal, abs_flux] = G_den2ne_alg.globalBalance(withLosses=False)
