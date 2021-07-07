@@ -36,7 +36,7 @@ def main():
     G_den2ne_alg.selectBestIDs(Den2ne.CRITERION_POWER_BALANCE)
 
     # Tercera fase: Balance global de la red y establece los flujos de potencia
-    [total_balance_ideal, abs_flux] = G_den2ne_alg.globalBalance(withLosses=False)
+    [total_balance_ideal, abs_flux] = G_den2ne_alg.globalBalance(withLosses=False, withDebugPlot=True, positions=positions)
 
     # Debug Power balance 
     G_den2ne_alg.write_loads_report('results/reports/report_loads.txt')

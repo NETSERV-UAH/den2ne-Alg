@@ -285,7 +285,7 @@ class Graph(object):
             else:
                 color_map.append('#95e8d6')
 
-        fig = plt.figure()
+        fig = plt.figure(figsize=(16.0, 10.0))
         nx.draw_networkx_nodes(G_nx, pos, node_color=color_map, node_size=270)
         nx.draw_networkx_edges(G_nx, pos, edgelist=edge_normal, width=2)
         nx.draw_networkx_edges(G_nx, pos, edgelist=edge_switch_open, width=2, alpha=0.7, edge_color="g", style="dashed")
@@ -295,6 +295,54 @@ class Graph(object):
         plt.axis("off")
         plt.title(title)
         plt.plot()
+
+    def plotStepDiGraph(self, path, positions, title):
+        """
+            Funcion para pintar el grafo dirigido en pasos
+        """
+        G_nx = nx.Graph()
+        G_nx = G_nx.to_directed()
+
+        color_map = []
+
+        for node in self.nodes:
+            for link in node.links:
+                G_nx.add_edge(
+                    node.name, node.neighbors[node.links.index(link)], type_link=link.type, status=link.state, direction=link.direction)
+
+        edge_normal = [(u, v) for (u, v, d) in G_nx.edges(
+            data=True) if d["type_link"] == Link.NORMAL and d["direction"] == 'up']
+        edge_switch_open = [(u, v) for (u, v, d) in G_nx.edges(
+            data=True) if d["type_link"] == Link.SWITCH and d["status"] == 'open' and d["direction"] == 'up']
+        edge_switch_closed = [(u, v) for (u, v, d) in G_nx.edges(
+            data=True) if d["type_link"] == Link.SWITCH and d["status"] == 'closed' and d["direction"] == 'up']
+
+        pos = nx.spring_layout(G_nx, k=0.2)
+
+        for position in positions:
+            pos[position["node"]] = (position["x"], -position["y"])
+
+        for node in G_nx:
+            if self.findNode(node)[1].type == Node.NORMAL:
+                color_map.append('#19affa')
+            else:
+                color_map.append('#95e8d6')
+
+        fig = plt.figure(figsize=(16.0, 10.0))
+        nx.draw_networkx_nodes(G_nx, pos, node_color=color_map, node_size=270)
+        nx.draw_networkx_edges(G_nx, pos, edgelist=edge_normal, width=2)
+        nx.draw_networkx_edges(G_nx, pos, edgelist=edge_switch_open,
+                               width=2, alpha=0.7, edge_color="g", style="dashed")
+        nx.draw_networkx_edges(G_nx, pos, edgelist=edge_switch_closed,
+                               width=2, alpha=0.7,  edge_color="r", style="dashed")
+        nx.draw_networkx_labels(G_nx, pos, font_size=10,
+                                font_family="sans-serif")
+
+        plt.axis("off")
+        plt.title(title)
+        plt.plot()
+        plt.savefig(path + title + '.png', dpi=100)
+        plt.close(fig)
 
     @staticmethod
     def showGraph():

@@ -2,6 +2,7 @@
 
 from numpy.lib.function_base import append
 from .den2neHLMAC import HLMAC
+import imageio
 
 
 class Den2ne(object):
@@ -34,7 +35,8 @@ class Den2ne(object):
 
         # Empezamos por el root, como no tiene padre el root, su HLMAC parent addr es None -> No hereda.
         # además, no tiene ninguna dependencia (es decir no tiene ninguno enlace por delante de el de tipo switch)
-        self.G.nodes[self.G.findNode(self.root)[0]].ids.append(HLMAC(None, self.root, None))
+        self.G.nodes[self.G.findNode(self.root)[0]].ids.append(
+            HLMAC(None, self.root, None))
 
         # El primero en ser visitado es el root
         nodes_to_attend.append(self.root)
@@ -59,12 +61,15 @@ class Den2ne(object):
                             # Si no hay bucles asignamos la ID al vecino
 
                             # Vamos a comprobar si la relación del nodo con el vecino viene dada por un enlace de tipo switch
-                            id_switch_node = self.G.findSwitchID(curr_node[1].name)
+                            id_switch_node = self.G.findSwitchID(
+                                curr_node[1].name)
                             id_switch_neighbor = self.G.findSwitchID(neighbor)
                             if id_switch_node == id_switch_neighbor:
-                                self.G.nodes[self.G.findNode(neighbor)[0]].ids.append(HLMAC(curr_node[1].ids[i], neighbor, id_switch_node))
+                                self.G.nodes[self.G.findNode(neighbor)[0]].ids.append(
+                                    HLMAC(curr_node[1].ids[i], neighbor, id_switch_node))
                             else:
-                                self.G.nodes[self.G.findNode(neighbor)[0]].ids.append(HLMAC(curr_node[1].ids[i], neighbor, None))
+                                self.G.nodes[self.G.findNode(neighbor)[0]].ids.append(
+                                    HLMAC(curr_node[1].ids[i], neighbor, None))
 
                             # Registramos el vecino emn la pila para ser visitado más adelante
                             nodes_to_attend.append(neighbor)
@@ -81,6 +86,33 @@ class Den2ne(object):
         """
         for node in self.G.nodes:
             self.global_ids.append(node.getActiveID())
+
+    def prunningIDs(self):
+        """
+            Función para preservar la coherencia en el grafo de acuerdo a las IDs elegidas
+        """
+
+        # Vamos a ordenar la lista de globals ids
+        self.global_ids.sort(key=Den2ne.key_sort_by_HLMAC_len, reverse=True)
+
+        for ids in self.global_ids[:]:
+            print(HLMAC.hlmac_addr_print(ids))
+
+            # Vamos a ver la ID a continuación a la id dada
+            nextNode = self.G.findNode(ids.getNextHop())
+            
+            # Mientras que no seamos el root
+            if nextNode is not None:
+                nextID = nextNode[1].ids[nextNode[1].getIndexID(ids.hlmac[0:-1])]
+
+                if nextID not in self.global_ids:
+                    self.G.nodes[nextNode[0]].ids[nextNode[1].ids.index(nextNode[1].getActiveID())].active = False
+                    self.G.nodes[nextNode[0]].ids[nextNode[1].ids.index(nextID)].active = True
+
+                    # Actualizamos la lista
+                    self.global_ids.remove(ids)
+                    self.global_ids.append(nextID)
+                    self.global_ids.sort(key=Den2ne.key_sort_by_HLMAC_len, reverse=True)
 
     def selectBestIDs(self, criterion):
         """
@@ -106,8 +138,12 @@ class Den2ne(object):
         # Una vez elegidas vamos a recoger las IDs activas de cada nodo
         self.collectActiveIDs()
 
+        # Vamos a vigilar que haya coherencia en las IDs -> que no haya bandazos de potencia
+        self.prunningIDs()
+
         # Por último, vamos a ver el las dependencias con los switchs y activar aquellos que sean necesarios
-        dependences = list(set(sum([active_ids.depends_on for active_ids in self.global_ids], [])))
+        dependences = list(
+            set(sum([active_ids.depends_on for active_ids in self.global_ids], [])))
 
         for sw in self.G.sw_config:
             if not self.G.sw_config[sw]["pruned"]:
@@ -125,7 +161,8 @@ class Den2ne(object):
 
             # La ID con un menor tamaño será la ID con menor numero de saltos al root
             # Por ello, esa será la activa.
-            self.G.nodes[self.G.nodes.index(node)].ids[lens.index(min(lens))].active = True
+            self.G.nodes[self.G.nodes.index(
+                node)].ids[lens.index(min(lens))].active = True
 
     def selectBestID_by_distance(self):
         """
@@ -134,7 +171,8 @@ class Den2ne(object):
         for node in self.G.nodes:
             dists = [self.getTotalDistance(id) for id in node.ids]
 
-            self.G.nodes[self.G.nodes.index(node)].ids[dists.index(min(dists))].active = True
+            self.G.nodes[self.G.nodes.index(
+                node)].ids[dists.index(min(dists))].active = True
 
     def getTotalDistance(self, id):
         """
@@ -142,7 +180,8 @@ class Den2ne(object):
         """
         distances = 0
         for i in range(0, len(id.hlmac)-1):
-            distances += self.G.findNode(id.hlmac[i])[1].links[self.G.findNode(id.hlmac[i])[1].neighbors.index(id.hlmac[i+1])].dist
+            distances += self.G.findNode(id.hlmac[i])[1].links[self.G.findNode(
+                id.hlmac[i])[1].neighbors.index(id.hlmac[i+1])].dist
 
         return distances
 
@@ -153,7 +192,8 @@ class Den2ne(object):
         for node in self.G.nodes:
             balances = [self.getTotalBalance(id) for id in node.ids]
 
-            self.G.nodes[self.G.nodes.index(node)].ids[balances.index(max(balances))].active = True
+            self.G.nodes[self.G.nodes.index(node)].ids[balances.index(
+                max(balances))].active = True
 
     def getTotalBalance(self, id):
         """
@@ -170,9 +210,11 @@ class Den2ne(object):
             Función para decidir la mejor ID de un nodo por balance de potencia al root con perdidas
         """
         for node in self.G.nodes:
-            balances = [self.getTotalBalance_with_Losses(id) for id in node.ids]
+            balances = [self.getTotalBalance_with_Losses(
+                id) for id in node.ids]
 
-            self.G.nodes[self.G.nodes.index(node)].ids[balances.index(max(balances))].active = True
+            self.G.nodes[self.G.nodes.index(node)].ids[balances.index(
+                max(balances))].active = True
 
     def getTotalBalance_with_Losses(self, id):
         """
@@ -183,7 +225,8 @@ class Den2ne(object):
             curr_node = self.G.findNode(id.hlmac[i])
 
             # No tenemos en cuenta el root.. es uno nodo virtual, nos ahorramos comprobaciones y sumar 0
-            balance += (curr_node[1].load - curr_node[1].links[curr_node[1].neighbors.index(id.hlmac[i-1])].getLosses(curr_node[1].load + balance))
+            balance += (curr_node[1].load - curr_node[1].links[curr_node[1].neighbors.index(
+                id.hlmac[i-1])].getLosses(curr_node[1].load + balance))
 
         return balance
 
@@ -194,7 +237,8 @@ class Den2ne(object):
         for node in self.G.nodes:
             losses = [self.getTotalLinks_Losses(id) for id in node.ids]
 
-            self.G.nodes[self.G.nodes.index(node)].ids[losses.index(min(losses))].active = True
+            self.G.nodes[self.G.nodes.index(
+                node)].ids[losses.index(min(losses))].active = True
 
     def getTotalLinks_Losses(self, id):
         """
@@ -208,12 +252,13 @@ class Den2ne(object):
         for i in range(len(id.hlmac)-1, 0, -1):
             curr_node = self.G.findNode(id.hlmac[i])
 
-            losses += curr_node[1].links[curr_node[1].neighbors.index(id.hlmac[i-1])].getLosses(curr_load)
+            losses += curr_node[1].links[curr_node[1].neighbors.index(
+                id.hlmac[i-1])].getLosses(curr_load)
             curr_load -= losses
 
         return losses
 
-    def globalBalance(self, withLosses):
+    def globalBalance(self, withLosses, withDebugPlot, positions):
         """
             Funcion que obtniene el balance global de la red y la dirección de cada enlace (hacia donde va el flujo de potencia) 
         """
@@ -227,11 +272,15 @@ class Den2ne(object):
         # Vamos tambien a prestar atencion a la capacidad
         cap = 0.0
 
+        # Vamos a llevar la cuenta de las iteraciones
+        iteration = 0
+
         # Mientras haya IDs != del root -> Vamos a trabajar con listado global como si fuera una pila
         while len(self.global_ids) > 1:
 
             # Origen
-            [origin_index, origin] = self.G.findNode(self.global_ids[0].getOrigin())
+            [origin_index, origin] = self.G.findNode(
+                self.global_ids[0].getOrigin())
 
             # Destino
             [dst_index, dst] = self.G.findNode(self.global_ids[0].getNextHop())
@@ -250,7 +299,7 @@ class Den2ne(object):
             if withLosses:
                 # if cap is None or cap >= origin.load:
                 #     self.G.nodes[dst_index].load += origin.load - origin.links[origin.neighbors.index(dst.name)].getLosses(origin.load)
-                    
+
                 #     # Actualizamos el flujo absoluto
                 #     abs_flux += abs(origin.load - origin.links[origin.neighbors.index(dst.name)].getLosses(origin.load))
 
@@ -259,10 +308,13 @@ class Den2ne(object):
 
                 #     # Actualizamos el flujo absoluto
                 #     abs_flux += abs(cap - origin.links[origin.neighbors.index(dst.name)].getLosses(cap))
-                self.G.nodes[dst_index].load += origin.load - origin.links[origin.neighbors.index(dst.name)].getLosses(origin.load)
-                    
+                self.G.nodes[dst_index].load += origin.load - \
+                    origin.links[origin.neighbors.index(
+                        dst.name)].getLosses(origin.load)
+
                 # Actualizamos el flujo absoluto
-                abs_flux += abs(origin.load - origin.links[origin.neighbors.index(dst.name)].getLosses(origin.load))
+                abs_flux += abs(origin.load -
+                                origin.links[origin.neighbors.index(dst.name)].getLosses(origin.load))
             else:
                 # if cap is None or cap >= origin.load:
                 #     self.G.nodes[dst_index].load += origin.load
@@ -284,6 +336,20 @@ class Den2ne(object):
 
             # Una vez atendida la ID más larga de la lista, la desalojamos
             self.global_ids.pop(0)
+
+            # Incrementamos el contador de iteraciones
+            iteration += 1
+
+            # [DEBUG] Pintamos el flujo paso por paso
+            if withDebugPlot:
+                path = 'results/'
+                self.G.plotStepDiGraph(path, positions, str(iteration))
+
+        if withDebugPlot:
+            with imageio.get_writer(path + 'test.gif', mode='I', fps=2) as writer:
+                for filename in range(1, iteration + 1):
+                    image = imageio.imread(path + str(filename)+'.png')
+                    writer.append_data(image)
 
         # Devolvemos el balance total
         return [self.G.findNode(self.root)[1].load, abs_flux]
@@ -325,18 +391,29 @@ class Den2ne(object):
         """
         with open(filename, 'w') as file:
             for node in self.G.nodes:
-                file.write('-------------------------------------------------------------------------')
-                file.write('-------------------------------------------------------------------------\n')
-                file.write(f'| Node: {node.name}  | Type: {node.type} | Neighbors: {len(node.neighbors)} \n')
-                file.write('-------------------------------------------------------------------------')
-                file.write('-------------------------------------------------------------------------\n')
-                file.write('|  Status  |  ID                                                              \n')
-                file.write('-------------------------------------------------------------------------')
-                file.write('-------------------------------------------------------------------------\n')
+                file.write(
+                    '-------------------------------------------------------------------------')
+                file.write(
+                    '-------------------------------------------------------------------------\n')
+                file.write(
+                    f'| Node: {node.name}  | Type: {node.type} | Neighbors: {len(node.neighbors)} \n')
+                file.write(
+                    '-------------------------------------------------------------------------')
+                file.write(
+                    '-------------------------------------------------------------------------\n')
+                file.write(
+                    '|  Status  |  ID                                                              \n')
+                file.write(
+                    '-------------------------------------------------------------------------')
+                file.write(
+                    '-------------------------------------------------------------------------\n')
                 for id in node.ids:
-                    file.write(f'|   {id.used}   |  {HLMAC.hlmac_addr_print(id)} \n')
-                file.write('-------------------------------------------------------------------------')
-                file.write('-------------------------------------------------------------------------\n')
+                    file.write(
+                        f'|   {id.used}   |  {HLMAC.hlmac_addr_print(id)} \n')
+                file.write(
+                    '-------------------------------------------------------------------------')
+                file.write(
+                    '-------------------------------------------------------------------------\n')
                 file.write('\n')
 
     def write_loads_report(self, filename):
@@ -345,21 +422,30 @@ class Den2ne(object):
         """
         with open(filename, 'w') as file:
             for node in self.G.nodes:
-                file.write('-------------------------------------------------------------------------')
-                file.write('-------------------------------------------------------------------------\n')
-                file.write(f'| Node: {node.name}  | Type: {node.type} | Neighbors: {len(node.neighbors)} | Load: {node.load} \n')
-                file.write('-------------------------------------------------------------------------')
-                file.write('-------------------------------------------------------------------------\n')
-                file.write('|    Flag    |  ID                                                              \n')
-                file.write('-------------------------------------------------------------------------')
-                file.write('-------------------------------------------------------------------------\n')
+                file.write(
+                    '-------------------------------------------------------------------------')
+                file.write(
+                    '-------------------------------------------------------------------------\n')
+                file.write(
+                    f'| Node: {node.name}  | Type: {node.type} | Neighbors: {len(node.neighbors)} | Load: {node.load} \n')
+                file.write(
+                    '-------------------------------------------------------------------------')
+                file.write(
+                    '-------------------------------------------------------------------------\n')
+                file.write(
+                    '|    Flag    |  ID                                                              \n')
+                file.write(
+                    '-------------------------------------------------------------------------')
+                file.write(
+                    '-------------------------------------------------------------------------\n')
                 for id in node.ids:
                     file.write(
                         f'|     {int(id.active)}     |  {HLMAC.hlmac_addr_print(id)} \n')
-                file.write('-------------------------------------------------------------------------')
-                file.write('-------------------------------------------------------------------------\n')
+                file.write(
+                    '-------------------------------------------------------------------------')
+                file.write(
+                    '-------------------------------------------------------------------------\n')
                 file.write('\n')
-
 
     def write_swConfig_report(self, filename):
         """
@@ -367,9 +453,12 @@ class Den2ne(object):
         """
         with open(filename, 'w') as file:
             for key in self.G.sw_config:
-                file.write('-------------------------------------------------------------------------\n')
-                file.write(f'| ID: {key}  | Node A: {self.G.sw_config[key]["node_a"]} | Node B: {self.G.sw_config[key]["node_b"]} | Status: {self.G.sw_config[key]["state"]}                    |\n')
-                file.write('-------------------------------------------------------------------------\n')
+                file.write(
+                    '-------------------------------------------------------------------------\n')
+                file.write(
+                    f'| ID: {key}  | Node A: {self.G.sw_config[key]["node_a"]} | Node B: {self.G.sw_config[key]["node_b"]} | Status: {self.G.sw_config[key]["state"]}                    |\n')
+                file.write(
+                    '-------------------------------------------------------------------------\n')
                 file.write('\n')
 
     def write_swConfig_CSV(self, filename):
@@ -379,4 +468,5 @@ class Den2ne(object):
         with open(filename, 'w') as file:
             file.write('ID,Node A,Node B,State\n')
             for key in self.G.sw_config:
-                file.write(f'{key},{self.G.sw_config[key]["node_a"]},{self.G.sw_config[key]["node_b"]},{self.G.sw_config[key]["state"]}\n')
+                file.write(
+                    f'{key},{self.G.sw_config[key]["node_a"]},{self.G.sw_config[key]["node_b"]},{self.G.sw_config[key]["state"]}\n')

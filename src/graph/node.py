@@ -1,5 +1,6 @@
 #!/usr/bin/python3
 
+from den2ne.den2neHLMAC import HLMAC
 from .link import Link
 
 
@@ -42,3 +43,19 @@ class Node(object):
                 break
 
         return ret_ID
+
+    def getIndexID(self, id_to_check):
+        """
+            Funcion para obtener el indexs de una lista de saltos
+        """
+
+        # Aqui no vamos a trabajar con los Objs HLMACs, vamos atrabajar directamente con la lista de chars
+        
+        ret_index = None
+
+        for id in self.ids:
+            if id_to_check == id.hlmac:
+                ret_index = self.ids.index(id)
+                break
+            
+        return ret_index
