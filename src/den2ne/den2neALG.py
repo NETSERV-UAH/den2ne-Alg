@@ -3,6 +3,7 @@
 from numpy.lib.function_base import append
 from .den2neHLMAC import HLMAC
 import imageio
+import os
 
 
 class Den2ne(object):
@@ -80,39 +81,46 @@ class Den2ne(object):
             # Por último desalojamos al nodo atendido
             nodes_to_attend.pop(0)
 
-    def collectActiveIDs(self):
+    def flowInertia(self):
         """
-            Funcion que recoje en una variable global las IDs en uso para establecer el grafo elegido
-        """
-        for node in self.G.nodes:
-            self.global_ids.append(node.getActiveID())
-
-    def prunningIDs(self):
-        """
-            Función para preservar la coherencia en el grafo de acuerdo a las IDs elegidas
+            Función para preservar la coherencia en el grafo de los distintos flujos
         """
 
         # Vamos a ordenar la lista de globals ids
         self.global_ids.sort(key=Den2ne.key_sort_by_HLMAC_len, reverse=True)
 
-        for ids in self.global_ids[:]:
-            print(HLMAC.hlmac_addr_print(ids))
+        for i in range(len(self.global_ids[0].hlmac)-2, 0, -1):
 
-            # Vamos a ver la ID a continuación a la id dada
-            nextNode = self.G.findNode(ids.getNextHop())
-            
-            # Mientras que no seamos el root
-            if nextNode is not None:
-                nextID = nextNode[1].ids[nextNode[1].getIndexID(ids.hlmac[0:-1])]
+            # Vamos a ver la ID más larga en el camino hacia el root
+            nextNode = self.G.findNode(self.global_ids[0].hlmac[i])
 
-                if nextID not in self.global_ids:
-                    self.G.nodes[nextNode[0]].ids[nextNode[1].ids.index(nextNode[1].getActiveID())].active = False
-                    self.G.nodes[nextNode[0]].ids[nextNode[1].ids.index(nextID)].active = True
+            # Miramos el index que debería haber
+            nextID = nextNode[1].ids[nextNode[1].getIndexID(self.global_ids[0].hlmac[0:i+1])]
 
-                    # Actualizamos la lista
-                    self.global_ids.remove(ids)
-                    self.global_ids.append(nextID)
-                    self.global_ids.sort(key=Den2ne.key_sort_by_HLMAC_len, reverse=True)
+            if nextID not in self.global_ids:
+                # Sacamos la ID antigua de la lista
+                self.global_ids.remove(nextNode[1].getActiveID())
+
+                # Establecemos como activa la nueva ID
+                self.G.nodes[nextNode[0]].ids[nextNode[1].ids.index(nextNode[1].getActiveID())].active = False
+                self.G.nodes[nextNode[0]].ids[nextNode[1].ids.index(nextID)].active = True
+
+                # Actualizamos la lista
+                self.global_ids.append(nextID)
+
+                # Por último, notificamos a nuestros vecinos de la ramas anexas a la rama
+                # principal, para que sean conscientes de la incercia que está ocurriendo
+                # en aras de que entregen su potencia, antes que se recorra el camino principal
+                for neighbor in nextNode[1].neighbors:
+                    # Para que sea un vecino valido no tiene que ser ni el nextHop ni el anterior
+                    if neighbor is not self.global_ids[0].hlmac[i+1] and neighbor is not self.global_ids[0].hlmac[i-1]:
+
+                        # En este punto desconocemos la longitud de la rama.. por ello vamos a recorrerla con un while
+                        branch_nodes = [neighbor]
+
+                        while len(branch_nodes) > 0:
+                            pass
+
 
     def selectBestIDs(self, criterion):
         """
@@ -135,15 +143,8 @@ class Den2ne(object):
         elif Den2ne.CRITERION_LINKS_LOSSES == criterion:
             self.selectBestID_by_Links_Losses()
 
-        # Una vez elegidas vamos a recoger las IDs activas de cada nodo
-        self.collectActiveIDs()
-
-        # Vamos a vigilar que haya coherencia en las IDs -> que no haya bandazos de potencia
-        self.prunningIDs()
-
         # Por último, vamos a ver el las dependencias con los switchs y activar aquellos que sean necesarios
-        dependences = list(
-            set(sum([active_ids.depends_on for active_ids in self.global_ids], [])))
+        dependences = list(set(sum([active_ids.depends_on for active_ids in self.global_ids], [])))
 
         for sw in self.G.sw_config:
             if not self.G.sw_config[sw]["pruned"]:
@@ -161,8 +162,8 @@ class Den2ne(object):
 
             # La ID con un menor tamaño será la ID con menor numero de saltos al root
             # Por ello, esa será la activa.
-            self.G.nodes[self.G.nodes.index(
-                node)].ids[lens.index(min(lens))].active = True
+            self.G.nodes[self.G.nodes.index(node)].ids[lens.index(min(lens))].active = True
+            self.global_ids.append(node.getActiveID())
 
     def selectBestID_by_distance(self):
         """
@@ -171,8 +172,8 @@ class Den2ne(object):
         for node in self.G.nodes:
             dists = [self.getTotalDistance(id) for id in node.ids]
 
-            self.G.nodes[self.G.nodes.index(
-                node)].ids[dists.index(min(dists))].active = True
+            self.G.nodes[self.G.nodes.index(node)].ids[dists.index(min(dists))].active = True
+            self.global_ids.append(node.getActiveID())
 
     def getTotalDistance(self, id):
         """
@@ -180,8 +181,7 @@ class Den2ne(object):
         """
         distances = 0
         for i in range(0, len(id.hlmac)-1):
-            distances += self.G.findNode(id.hlmac[i])[1].links[self.G.findNode(
-                id.hlmac[i])[1].neighbors.index(id.hlmac[i+1])].dist
+            distances += self.G.findNode(id.hlmac[i])[1].links[self.G.findNode(id.hlmac[i])[1].neighbors.index(id.hlmac[i+1])].dist
 
         return distances
 
@@ -192,8 +192,10 @@ class Den2ne(object):
         for node in self.G.nodes:
             balances = [self.getTotalBalance(id) for id in node.ids]
 
-            self.G.nodes[self.G.nodes.index(node)].ids[balances.index(
-                max(balances))].active = True
+            self.G.nodes[self.G.nodes.index(node)].ids[balances.index(max(balances))].active = True
+            self.global_ids.append(node.getActiveID())
+
+        self.flowInertia()
 
     def getTotalBalance(self, id):
         """
@@ -210,11 +212,12 @@ class Den2ne(object):
             Función para decidir la mejor ID de un nodo por balance de potencia al root con perdidas
         """
         for node in self.G.nodes:
-            balances = [self.getTotalBalance_with_Losses(
-                id) for id in node.ids]
+            balances = [self.getTotalBalance_with_Losses(id) for id in node.ids]
 
-            self.G.nodes[self.G.nodes.index(node)].ids[balances.index(
-                max(balances))].active = True
+            self.G.nodes[self.G.nodes.index(node)].ids[balances.index(max(balances))].active = True
+            self.global_ids.append(node.getActiveID())
+
+        self.flowInertia()
 
     def getTotalBalance_with_Losses(self, id):
         """
@@ -237,8 +240,8 @@ class Den2ne(object):
         for node in self.G.nodes:
             losses = [self.getTotalLinks_Losses(id) for id in node.ids]
 
-            self.G.nodes[self.G.nodes.index(
-                node)].ids[losses.index(min(losses))].active = True
+            self.G.nodes[self.G.nodes.index(node)].ids[losses.index(min(losses))].active = True
+            self.global_ids.append(node.getActiveID())
 
     def getTotalLinks_Losses(self, id):
         """
@@ -350,6 +353,7 @@ class Den2ne(object):
                 for filename in range(1, iteration + 1):
                     image = imageio.imread(path + str(filename)+'.png')
                     writer.append_data(image)
+                    os.remove(path + str(filename)+'.png')
 
         # Devolvemos el balance total
         return [self.G.findNode(self.root)[1].load, abs_flux]
