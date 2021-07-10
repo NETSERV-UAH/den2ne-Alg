@@ -72,8 +72,8 @@ def test_ieee123():
     # Variables
     dirs = ['reports', 'csv', 'fig']
     topo_name = 'ieee123'
-    criteria = [Den2ne.CRITERION_NUM_HOPS, Den2ne.CRITERION_DISTANCE, Den2ne.CRITERION_LINKS_LOSSES,
-                Den2ne.CRITERION_POWER_BALANCE, Den2ne.CRITERION_POWER_BALANCE_WITH_LOSSES]
+    criteria = (Den2ne.CRITERION_NUM_HOPS, Den2ne.CRITERION_DISTANCE, Den2ne.CRITERION_LINKS_LOSSES,
+                Den2ne.CRITERION_POWER_BALANCE, Den2ne.CRITERION_POWER_BALANCE_WITH_LOSSES)
     out_data = dict()
 
     # Preparamos los directorios de resultados
@@ -102,6 +102,8 @@ def test_ieee123():
     # Vamos a iterar por todos los intantes de cargas
     for delta in range(0, len(loads['1'])):
 
+        out_data[delta] = dict()
+
         # Vamos a iterar por criterio
         for criterion in criteria:
 
@@ -112,6 +114,8 @@ def test_ieee123():
 
             # Ideal balance
             [total_balance_ideal, abs_flux] = G_den2ne_alg.globalBalance(withLosses=False, withCap=False, withDebugPlot=False, positions=positions, path='results/')
+            out_data[delta][criterion]['total_balance_ideal'] = total_balance_ideal
+            out_data[delta][criteria]['abs_flux'] = abs_flux
 
             # Re-Init loads
             G_den2ne_alg.updateLoads(loads, delta)
@@ -120,6 +124,8 @@ def test_ieee123():
 
             # Withloss balance
             [total_balance_with_losses, abs_flux_with_losses] = G_den2ne_alg.globalBalance(withLosses=True, withCap=False, withDebugPlot=False, positions=positions, path='results/')
+            out_data[delta][criteria]['total_balance_with_losses'] = total_balance_with_losses
+            out_data[delta][criteria]['abs_flux_with_losses'] = abs_flux_with_losses
 
             # Re-Init loads
             G_den2ne_alg.updateLoads(loads, delta)
@@ -128,13 +134,8 @@ def test_ieee123():
 
             # Withloss and Cap balance
             [total_balance_with_lossesCap, abs_flux_with_lossesCap] = G_den2ne_alg.globalBalance(withLosses=True, withCap=True, withDebugPlot=False, positions=positions, path='results/')
-
-            # Save data
-            out_data[delta][criteria] = {
-                'total_balance_ideal': total_balance_ideal, 'abs_flux': abs_flux,
-                'total_balance_with_losses': total_balance_with_losses, 'abs_flux_with_losses': abs_flux_with_losses,
-                'total_balance_with_lossesCap': total_balance_with_lossesCap, 'abs_flux_with_lossesCap': abs_flux_with_lossesCap
-            }
+            out_data[delta][criteria]['total_balance_with_lossesCap'] = total_balance_with_lossesCap
+            out_data[delta][criteria]['abs_flux_with_lossesCap'] = abs_flux_with_lossesCap
 
             # Genearación de informes
             G_den2ne_alg.write_swConfig_report(f'results/{topo_name}/report_swConfig_{delta}_{criterion}.txt')
