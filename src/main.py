@@ -14,6 +14,10 @@ def main():
     sw_edges = DataGatherer.getSwitches('data/switches.csv')
     positions = DataGatherer.getPositions('data/node_positions.csv')
 
+    aux = 0.0
+    for test in loads:
+        aux += loads[test][0]
+
     # Creamos la var del grafo para el primer instante
     G = Graph(0, loads, edges, sw_edges, edges_conf, root='150')
 
@@ -33,19 +37,18 @@ def main():
     G_den2ne_alg.spread_ids()
 
     # Segunda fase: Decisión de IDs en base a un criterio
-    G_den2ne_alg.selectBestIDs(Den2ne.CRITERION_POWER_BALANCE)
+    G_den2ne_alg.selectBestIDs(Den2ne.CRITERION_LINKS_LOSSES)
 
     # Tercera fase: Balance global de la red y establece los flujos de potencia
-    [total_balance_ideal, abs_flux] = G_den2ne_alg.globalBalance(withLosses=False, withDebugPlot=True, positions=positions)
+    [total_balance_ideal, abs_flux] = G_den2ne_alg.globalBalance(withLosses=False, withDebugPlot=False, positions=positions)
 
-    # Debug Power balance 
+    # Debug Power balance
     G_den2ne_alg.write_loads_report('results/reports/report_loads.txt')
-
 
     # Podemos calcular las perdidas totales:
     #G_den2ne_alg.updateLoads(loads, 0)
-    #G_den2ne_alg.clearSelectedIDs()
-    #G_den2ne_alg.selectBestIDs(Den2ne.CRITERION_NUM_HOPS)
+    # G_den2ne_alg.clearSelectedIDs()
+    # G_den2ne_alg.selectBestIDs(Den2ne.CRITERION_NUM_HOPS)
     #[total_balance_with_losses, abs_flux] = G_den2ne_alg.globalBalance(withLosses=True)
     #loss = total_balance_ideal - total_balance_with_losses
 

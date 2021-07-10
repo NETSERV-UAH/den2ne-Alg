@@ -112,15 +112,48 @@ class Den2ne(object):
                 # principal, para que sean conscientes de la incercia que está ocurriendo
                 # en aras de que entregen su potencia, antes que se recorra el camino principal
                 for neighbor in nextNode[1].neighbors:
+
                     # Para que sea un vecino valido no tiene que ser ni el nextHop ni el anterior
-                    if neighbor is not self.global_ids[0].hlmac[i+1] and neighbor is not self.global_ids[0].hlmac[i-1]:
+                    if neighbor != self.global_ids[0].hlmac[i+1] and neighbor != self.global_ids[0].hlmac[i-1]:
 
                         # En este punto desconocemos la longitud de la rama.. por ello vamos a recorrerla con un while
-                        branch_nodes = [neighbor]
+                        branch_nodes_to_attend = [neighbor]
+                        branch_nodes_to_attended = [nextNode[1].name]
 
-                        while len(branch_nodes) > 0:
-                            pass
+                        while len(branch_nodes_to_attend) > 0:
 
+                            # Hay que visitar todos los vecinos de la rama que no hayan sido visitados
+                            curr_node = self.G.findNode(branch_nodes_to_attend[0])
+
+                            # Bucle de exploración, comprobamos que no hayan sido visitados
+                            for neig in curr_node[1].neighbors:
+                                if neig not in branch_nodes_to_attended:
+                                    branch_nodes_to_attend.append(neig)
+
+                            # Atendemos al nodo en cuestión, si su HLMAC es más corta que el nodo de la rama
+                            # principal, hay un problema.. hay que cambiar la HLMAC activa por la HLMAC que siga la incercia del
+                            # camino principal
+                            if len(curr_node[1].getActiveID().hlmac) <= len(nextID.hlmac):
+                                for id in curr_node[1].ids:
+                                    if all(hop in id.hlmac for hop in nextID.hlmac):
+                                        # Sacamos la ID antigua de la lista
+                                        self.global_ids.remove(curr_node[1].getActiveID())
+
+                                        # Marcamos como activa la nueva ID
+                                        self.G.nodes[curr_node[0]].ids[curr_node[1].ids.index(curr_node[1].getActiveID())].active = False
+                                        self.G.nodes[curr_node[0]].ids[curr_node[1].ids.index(id)].active = True
+
+                                        # Añadidmos la nueva ID a la lista
+                                        self.global_ids.append(id)
+
+                            else:
+                                # Si en una rama la ID activa ya cumple la condición, los nodos de atrás de la rama habrán elegido la misma
+                                # ID, ya que el camino es cte para todos ellos.
+                                break
+
+                            # Desalojamos al nodo atendido, y lo marcamos como atendido
+                            branch_nodes_to_attended.append(curr_node[1].name)
+                            branch_nodes_to_attend.pop(0)
 
     def selectBestIDs(self, criterion):
         """
