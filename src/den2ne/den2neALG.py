@@ -294,7 +294,7 @@ class Den2ne(object):
 
         return losses
 
-    def globalBalance(self, withLosses, withDebugPlot, positions):
+    def globalBalance(self, withLosses, withCap, withDebugPlot, positions, path):
         """
             Funcion que obtniene el balance global de la red y la dirección de cada enlace (hacia donde va el flujo de potencia) 
         """
@@ -332,36 +332,39 @@ class Den2ne(object):
             cap = self.G.getLinkCapacity(origin.name, dst.name)
 
             # Agregamos la carga de origen a destino
-            if withLosses:
-                # if cap is None or cap >= origin.load:
-                #     self.G.nodes[dst_index].load += origin.load - origin.links[origin.neighbors.index(dst.name)].getLosses(origin.load)
+            if withLosses and withCap:
+                if cap is None or cap >= origin.load:
+                    self.G.nodes[dst_index].load += origin.load - origin.links[origin.neighbors.index(dst.name)].getLosses(origin.load)
 
-                #     # Actualizamos el flujo absoluto
-                #     abs_flux += abs(origin.load - origin.links[origin.neighbors.index(dst.name)].getLosses(origin.load))
+                    # Actualizamos el flujo absoluto
+                    abs_flux += abs(origin.load - origin.links[origin.neighbors.index(dst.name)].getLosses(origin.load))
 
-                # else:
-                #     self.G.nodes[dst_index].load += cap - origin.links[origin.neighbors.index(dst.name)].getLosses(cap)
+                else:
+                    self.G.nodes[dst_index].load += cap - origin.links[origin.neighbors.index(dst.name)].getLosses(cap)
 
-                #     # Actualizamos el flujo absoluto
-                #     abs_flux += abs(cap - origin.links[origin.neighbors.index(dst.name)].getLosses(cap))
-                self.G.nodes[dst_index].load += origin.load - \
-                    origin.links[origin.neighbors.index(
-                        dst.name)].getLosses(origin.load)
+                    # Actualizamos el flujo absoluto
+                    abs_flux += abs(cap - origin.links[origin.neighbors.index(dst.name)].getLosses(cap))
+
+            elif withLosses:
+                self.G.nodes[dst_index].load += origin.load - origin.links[origin.neighbors.index(dst.name)].getLosses(origin.load)
 
                 # Actualizamos el flujo absoluto
-                abs_flux += abs(origin.load -
-                                origin.links[origin.neighbors.index(dst.name)].getLosses(origin.load))
+                abs_flux += abs(origin.load - origin.links[origin.neighbors.index(dst.name)].getLosses(origin.load))
+
+            elif withCap:
+                if cap is None or cap >= origin.load:
+                    self.G.nodes[dst_index].load += origin.load
+
+                    # Actualizamos el flujo absoluto
+                    abs_flux += abs(origin.load)
+                else:
+                    self.G.nodes[dst_index].load += cap
+
+                    # Actualizamos el flujo absoluto
+                    abs_flux += abs(cap)
+
             else:
-                # if cap is None or cap >= origin.load:
-                #     self.G.nodes[dst_index].load += origin.load
-
-                #     # Actualizamos el flujo absoluto
-                #     abs_flux += abs(origin.load)
-                # else:
-                #     self.G.nodes[dst_index].load += cap
-
-                #     # Actualizamos el flujo absoluto
-                #     abs_flux += abs(cap)
+                # Caso ideal
                 self.G.nodes[dst_index].load += origin.load
 
                 # Actualizamos el flujo absoluto
@@ -378,9 +381,9 @@ class Den2ne(object):
 
             # [DEBUG] Pintamos el flujo paso por paso
             if withDebugPlot:
-                path = 'results/'
                 self.G.plotStepDiGraph(path, positions, str(iteration))
 
+        # [DEBUG] Generamos GIF para visualizarlo mejor
         if withDebugPlot:
             with imageio.get_writer(path + 'test.gif', mode='I', fps=2) as writer:
                 for filename in range(1, iteration + 1):
