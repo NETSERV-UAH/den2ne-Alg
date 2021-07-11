@@ -19,32 +19,55 @@ function plotRangeLoads(init, fin)
     end
     
     % Obtenemos la media
-    data_avg = (1/(fin-init)).*sum(data3d(:,2:end,:),3);
-    data_avg_2 = mean(data3d(:,2:end,:),3);
-    
-    error = abs(data_avg - data_avg_2);
+    data_avg = mean(data3d(:,2:end,:),3);
+    sem = (std(data3d(:,2:end,:), [], 3)/(sqrt(fin-init+1)));
     
     % Pintamos la figura de balance global de potencias
-    data_power = data(:, [2 4 6]);
+    data_power = data_avg(:, [1 3 5]);
+    sem_power = sem(:, [1 3 5]);
     figure();
     set(gcf,'Position',[100 100 900 700]);
-    bar(data_power,1,'grouped','FaceColor','flat');
+    bar(data_power,1,'grouped','FaceColor','flat'); hold on;
+    
+    % Errors bars 
+    ngroups = size(data_power, 1);
+    nbars = size(data_power, 2);
+    threshhold = 0.2;
+
+    % Calculate the width for each bar group
+    groupwidth = min(0.8, nbars/(nbars + 1.5));
+
+    for i = 1:nbars
+        % Calculate center of each bar
+        x = (1:ngroups) - groupwidth/2 + (2*i-1) * groupwidth / (2*nbars);
+        errorbar(x, data_power(:,i), sem_power(:,i) + threshhold, 'k', 'linestyle', 'none');
+    end
+
     grid on
-    title("Balance de potencias global - Instante \delta_{" + num2str(delta) + "}")
+    title("Balance de potencias global en promedio")
     ylabel("Potencia (kW)")
     legend("Ideal", "Con perdidas", "Con perdidas y capacidades", 'Location', 'southoutside', 'NumColumns', 3)
     set(gca,'XTickLabel', {'Criterion 1' 'Criterion 2' 'Criterion 3' 'Criterion 4' 'Criterion 5' });
+    hold off;
 
     % Pintamos la figura de balance absoluto de potencia
-    data_power_abs = data(:, [3 5 7]);
+    data_power_abs = data_avg(:, [2 4 6]);
+    sem_power_abs = sem(:, [2 4 6]);
     figure();
     set(gcf,'Position',[100 100 900 700]);
-    b2 = bar(data_power_abs,1,'grouped','FaceColor', 'flat');
+    b2 = bar(data_power_abs,1,'grouped','FaceColor', 'flat'); hold on;
     for k = 1:size(data_power_abs,2)
         b2(k).CData = k;
     end
+    
+    for i = 1:nbars
+        % Calculate center of each bar
+        x = (1:ngroups) - groupwidth/2 + (2*i-1) * groupwidth / (2*nbars);
+        errorbar(x, data_power_abs(:,i), sem_power_abs(:,i), 'k', 'linestyle', 'none');
+    end
+    
     grid on
-    title("Valor absoluto del flujo de potencias - Instante \delta_{" + num2str(delta) + "}")
+    title("Valor absoluto del flujo de potencias en promedio")
     ylabel("Potencia (kW)")
     legend("Ideal", "Con perdidas", "Con perdidas y capacidades", 'Location', 'southoutside', 'NumColumns', 3)
     set(gca,'XTickLabel', {'Criterion 1' 'Criterion 2' 'Criterion 3' 'Criterion 4' 'Criterion 5' });
@@ -55,7 +78,7 @@ function plotRangeLoads(init, fin)
     set(gcf,'Position',[100 100 900 700]);
     bar(data_loss.', 0.5, 'FaceColor', [0.9290 0.6940 0.1250])
     grid on
-    title("Perdidas  por propagación e inserción de switches - Instante \delta_{" + num2str(delta) + "}")
+    title("Perdidas  por propagación e inserción de switches en promedio")
     ylabel("Potencia (kW)")
     set(gca,'XTickLabel', {'Criterion 1' 'Criterion 2' 'Criterion 3' 'Criterion 4' 'Criterion 5' });
     
@@ -65,7 +88,7 @@ function plotRangeLoads(init, fin)
     set(gcf,'Position',[100 100 900 700]);
     bar(data_loss_Cap.', 0.5, 'FaceColor', [0.6350 0.0780 0.1840])
     grid on
-    title("Perdidas por exceso en la capacidad del enlace - Instante \delta_{" + num2str(delta) + "}")
+    title("Perdidas por exceso en la capacidad del enlace en promedio")
     ylabel("Potencia (kW)")
     set(gca,'XTickLabel', {'Criterion 1' 'Criterion 2' 'Criterion 3' 'Criterion 4' 'Criterion 5' });
     
