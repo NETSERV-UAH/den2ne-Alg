@@ -16,7 +16,7 @@ class Graph(object):
         """
             Constructor de la clase Graph el cual conformará el grafo a partir de los datos procesados.
         """
-        self.nodes = list()
+        self.nodes = dict()
         self.root = root
         self.sw_config = self.buildSwitchConfig(switches)
         self.buildGraph(delta, loads, edges, switches, edges_conf)
@@ -28,31 +28,29 @@ class Graph(object):
 
         # Primero vamos a añadir todos los nodos normales del grafo, ya que los tenemos listados con sus cargas en loads.
         for node in loads:
-            self.nodes.append(Node(node, Node.NORMAL, loads[node][delta]))
+            self.nodes[node] = Node(node, Node.NORMAL, loads[node][delta])
 
         # Acto seguido vamos añadir todos los nodos virtuales
         for edge in edges:
-            if self.findNode(edge["node_a"]) is None:
-                self.nodes.append(Node(edge["node_a"], Node.VIRTUAL, 0))
-            elif self.findNode(edge["node_b"]) is None:
-                self.nodes.append(Node(edge["node_b"], Node.VIRTUAL, 0))
+            if edge["node_a"] not in self.nodes:
+                self.nodes[edge["node_a"]] = Node(edge["node_a"], Node.VIRTUAL, 0)
+            elif edge["node_b"] not in self.nodes:
+                self.nodes[edge["node_b"]] = Node(edge["node_b"], Node.VIRTUAL, 0)
 
         for sw_edge in switches:
-            if self.findNode(sw_edge["node_a"]) is None:
-                self.nodes.append(Node(sw_edge["node_a"], Node.VIRTUAL, 0))
-            elif self.findNode(sw_edge["node_b"]) is None:
-                self.nodes.append(Node(sw_edge["node_b"], Node.VIRTUAL, 0))
+            if sw_edge["node_a"] not in self.nodes:
+                self.nodes[sw_edge["node_a"]] = Node(sw_edge["node_a"], Node.VIRTUAL, 0)
+            elif sw_edge["node_b"] not in self.nodes:
+                self.nodes[sw_edge["node_b"]] = Node(sw_edge["node_b"], Node.VIRTUAL, 0)
 
         # A continuación, vamos a añadir a los nodos sus vecinos. Cada enlace es bi-direccional.
         for edge in edges:
-            self.nodes[(self.findNode(edge["node_a"])[0])].addNeighbor(edge["node_b"], Link.NORMAL, 'closed',
-                                                                       edge["dist"], edge["conf"], edges_conf[edge["conf"]]["coef_r"], edges_conf[edge["conf"]]["i_max"])
-            self.nodes[(self.findNode(edge["node_b"])[0])].addNeighbor(edge["node_a"], Link.NORMAL, 'closed',
-                                                                       edge["dist"], edge["conf"], edges_conf[edge["conf"]]["coef_r"], edges_conf[edge["conf"]]["i_max"])
+            self.nodes[edge["node_a"]].addNeighbor(edge["node_b"], Link.NORMAL, 'closed', edge["dist"], edge["conf"], edges_conf[edge["conf"]]["coef_r"], edges_conf[edge["conf"]]["i_max"])
+            self.nodes[edge["node_b"]].addNeighbor(edge["node_a"], Link.NORMAL, 'closed', edge["dist"], edge["conf"], edges_conf[edge["conf"]]["coef_r"], edges_conf[edge["conf"]]["i_max"])
 
         for sw_edge in switches:
-            self.nodes[self.findNode(sw_edge["node_a"])[0]].addNeighbor(sw_edge["node_b"], Link.SWITCH, sw_edge["state"], 0, 0, 0, 0)
-            self.nodes[self.findNode(sw_edge["node_b"])[0]].addNeighbor(sw_edge["node_a"], Link.SWITCH, sw_edge["state"], 0, 0, 0, 0)
+            self.nodes[sw_edge["node_a"]].addNeighbor(sw_edge["node_b"], Link.SWITCH, sw_edge["state"], 0, 0, 0, 0)
+            self.nodes[sw_edge["node_b"]].addNeighbor(sw_edge["node_a"], Link.SWITCH, sw_edge["state"], 0, 0, 0, 0)
 
     def buildSwitchConfig(self, switch):
         """
@@ -67,17 +65,6 @@ class Graph(object):
             sw_config[switch.index(sw_links)]["pruned"] = False
 
         return sw_config
-
-    def findNode(self, name):
-        """
-            Funcion para buscar un nodo en la lista del grafo
-        """
-
-        for node in self.nodes:
-            if node.name == name:
-                return [self.nodes.index(node), node]
-
-        return None
 
     def findSwitchID(self, name):
         """
@@ -114,12 +101,10 @@ class Graph(object):
         # que la info de estado siga siendo coherente.
 
         # Node A
-        node_a = self.findNode(self.sw_config[id]['node_a'])
-        self.nodes[node_a[0]].links[node_a[1].neighbors.index(self.sw_config[id]['node_b'])].state = state
+        self.nodes[self.sw_config[id]['node_a']].links[self.nodes[self.sw_config[id]['node_a']].neighbors.index(self.sw_config[id]['node_b'])].state = state
 
         # Node B
-        node_b = self.findNode(self.sw_config[id]['node_b'])
-        self.nodes[node_b[0]].links[node_b[1].neighbors.index(self.sw_config[id]['node_a'])].state = state
+        self.nodes[self.sw_config[id]['node_b']].links[self.nodes[self.sw_config[id]['node_b']].neighbors.index(self.sw_config[id]['node_a'])].state = state
 
         # Estos dos ultimos dos pasos si se va a eleiminar posteriormente uno de los nodos
         # va da igual, ya que el obj link se va a eliminar.. Pero de esta forma, hacemos que el metodo
@@ -135,9 +120,8 @@ class Graph(object):
         # Si por el contrario, la dirección es "down", la potencia va de node_a al node_b
 
         # Node A
-        [Node_a_index, Node_a] = self.findNode(node_a)
-        self.nodes[Node_a_index].links[Node_a.neighbors.index(node_b)].direction = direction
-    
+        self.nodes[node_a].links[self.nodes[node_a].neighbors.index(node_b)].direction = direction
+
     def getLinkCapacity(self, node_a, node_b):
         """
             Función para obtener la capacidad del enlace conformado por node_a y node_b 
@@ -145,12 +129,11 @@ class Graph(object):
         ret_cap = None
 
         # Vamos al nodo A, y miramos el enlace con el vecino node_b
-        [Node_a_index, Node_a] = self.findNode(node_a)
 
         # Si el enlace es de tipo switch.. no hay capacidad
-        if self.nodes[Node_a_index].links[Node_a.neighbors.index(node_b)].type == Link.NORMAL:
-            ret_cap = self.nodes[Node_a_index].links[Node_a.neighbors.index(node_b)].capacity
-        
+        if self.nodes[node_a].links[self.nodes[node_a].neighbors.index(node_b)].type == Link.NORMAL:
+            ret_cap = self.nodes[node_a].links[self.nodes[node_a].neighbors.index(node_b)].capacity
+
         return ret_cap
 
     def removeNode(self, name):
@@ -158,21 +141,17 @@ class Graph(object):
             Funcion para eliminar un nodo del grafo
         """
 
-        for node in self.nodes:
-            if node.name == name:
+        # Primero vamos a los vecinos y eleminimos los enlaces con el
+        for neighbor in self.nodes[name].neighbors:
+            # Obtenemos el index a eliminar (Es necesario para los enlaces por ser objs, no vale hacer un remove)
+            index_del = self.nodes[neighbor].neighbors.index(name)
 
-                # Primero vamos a los vecinos y eleminimos los enlaces con el
-                for neighbor in node.neighbors:
-                    # Obtenemos el index a eliminar (Es necesario para los enlaces por ser objs, no vale hacer un remove)
-                    index_del = self.nodes[self.findNode(neighbor)[0]].neighbors.index(node.name)
+            # Machacamos el nodo a eliminar como vecino, y con el index, eliminamos el enlace con el.
+            self.nodes[neighbor].neighbors.remove(name)
+            del self.nodes[neighbor].links[index_del]
 
-                    # Machacamos el nodo a eliminar como vecino, y con el index, eliminamos el enlace con el.
-                    self.nodes[self.findNode(neighbor)[0]].neighbors.remove(node.name)
-                    del self.nodes[self.findNode(neighbor)[0]].links[index_del]
-
-                # Por último eliminamos el nodo de la lista del grafo
-                self.nodes.remove(node)
-                break
+        # Por último eliminamos el nodo de la lista del grafo
+        self.nodes.pop(name)
 
     def pruneGraph(self):
         """
@@ -190,12 +169,12 @@ class Graph(object):
         # First sweep
         for node in self.nodes:
             if (
-                node.type == Node.VIRTUAL and
-                node.name != self.root and
-                len(node.links) == 1 and
-                node.links[0].type == Link.SWITCH
+                self.nodes[node].type == Node.VIRTUAL and
+                self.nodes[node].name != self.root and
+                len(self.nodes[node].links) == 1 and
+                self.nodes[node].links[0].type == Link.SWITCH
             ):
-                nodes_to_prune['sweep_1'].append(node.name)
+                nodes_to_prune['sweep_1'].append(self.nodes[node].name)
 
         # Lets open the switch links so that they dont consume anything
         for node in nodes_to_prune['sweep_1']:
@@ -207,11 +186,11 @@ class Graph(object):
         # Second sweep
         for node in self.nodes:
             if (
-                node.type == Node.VIRTUAL and
-                len(node.links) == 1 and
-                node.links[0].type == Link.NORMAL
+                self.nodes[node].type == Node.VIRTUAL and
+                len(self.nodes[node].links) == 1 and
+                self.nodes[node].links[0].type == Link.NORMAL
             ):
-                nodes_to_prune['sweep_2'].append(node.name)
+                nodes_to_prune['sweep_2'].append(self.nodes[node].name)
 
         for node in nodes_to_prune['sweep_2']:
             self.removeNode(node)
@@ -240,7 +219,7 @@ class Graph(object):
             pos[position["node"]] = (position["x"], -position["y"])
 
         for node in G_nx:
-            if self.findNode(node)[1].type == Node.NORMAL:
+            if self.nodes[node].type == Node.NORMAL:
                 color_map.append('#19affa')
             else:
                 color_map.append('#95e8d6')
@@ -280,7 +259,7 @@ class Graph(object):
             pos[position["node"]] = (position["x"], -position["y"])
 
         for node in G_nx:
-            if self.findNode(node)[1].type == Node.NORMAL:
+            if self.nodes[node].type == Node.NORMAL:
                 color_map.append('#19affa')
             else:
                 color_map.append('#95e8d6')
@@ -323,7 +302,7 @@ class Graph(object):
             pos[position["node"]] = (position["x"], -position["y"])
 
         for node in G_nx:
-            if self.findNode(node)[1].type == Node.NORMAL:
+            if self.nodes[node].type == Node.NORMAL:
                 color_map.append('#19affa')
             else:
                 color_map.append('#95e8d6')
