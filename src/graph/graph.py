@@ -205,9 +205,9 @@ class Graph(object):
         color_map = []
 
         for node in self.nodes:
-            for link in node.links:
+            for link in self.nodes[node].links:
                 G_nx.add_edge(
-                    node.name, node.neighbors[node.links.index(link)], type_link=link.type, status=link.state)
+                    self.nodes[node].name, self.nodes[node].neighbors[self.nodes[node].links.index(link)], type_link=link.type, status=link.state)
 
         edge_normal = [(u, v) for (u, v, d) in G_nx.edges(data=True) if d["type_link"] == Link.NORMAL]
         edge_switch_open = [(u, v) for (u, v, d) in G_nx.edges(data=True) if d["type_link"] == Link.SWITCH and d["status"] == 'open']
@@ -245,9 +245,9 @@ class Graph(object):
         color_map = []
 
         for node in self.nodes:
-            for link in node.links:
+            for link in self.nodes[node].links:
                 G_nx.add_edge(
-                    node.name, node.neighbors[node.links.index(link)], type_link=link.type, status=link.state, direction=link.direction)
+                    self.nodes[node].name, self.nodes[node].neighbors[self.nodes[node].links.index(link)], type_link=link.type, status=link.state, direction=link.direction)
 
         edge_normal = [(u, v) for (u, v, d) in G_nx.edges(data=True) if d["type_link"] == Link.NORMAL and d["direction"] == 'up']
         edge_switch_open = [(u, v) for (u, v, d) in G_nx.edges(data=True) if d["type_link"] == Link.SWITCH and d["status"] == 'open' and d["direction"] == 'up']
@@ -285,9 +285,9 @@ class Graph(object):
         color_map = []
 
         for node in self.nodes:
-            for link in node.links:
+            for link in self.nodes[node].links:
                 G_nx.add_edge(
-                    node.name, node.neighbors[node.links.index(link)], type_link=link.type, status=link.state, direction=link.direction)
+                    self.nodes[node].name, self.nodes[node].neighbors[self.nodes[node].links.index(link)], type_link=link.type, status=link.state, direction=link.direction)
 
         edge_normal = [(u, v) for (u, v, d) in G_nx.edges(
             data=True) if d["type_link"] == Link.NORMAL and d["direction"] == 'up']

@@ -38,7 +38,7 @@ def usage():
     G_den2ne_alg.spread_ids()
 
     # Segunda fase: Decisión de IDs en base a un criterio
-    G_den2ne_alg.selectBestIDs(Den2ne.CRITERION_NUM_HOPS)
+    G_den2ne_alg.selectBestIDs(Den2ne.CRITERION_POWER_BALANCE_WEIGHTED)
 
     # Tercera fase: Balance global de la red y establece los flujos de potencia
     [total_balance_ideal, abs_flux] = G_den2ne_alg.globalBalance(withLosses=False, withCap=False, withDebugPlot=False, positions=positions, path='results/')
@@ -73,7 +73,7 @@ def test_ieee123():
     dirs = ['reports', 'csv', 'fig']
     topo_name = 'ieee123'
     criteria = [Den2ne.CRITERION_NUM_HOPS, Den2ne.CRITERION_DISTANCE, Den2ne.CRITERION_LINKS_LOSSES,
-                Den2ne.CRITERION_POWER_BALANCE, Den2ne.CRITERION_POWER_BALANCE_WITH_LOSSES, 
+                Den2ne.CRITERION_POWER_BALANCE, Den2ne.CRITERION_POWER_BALANCE_WITH_LOSSES,
                 Den2ne.CRITERION_POWER_BALANCE_WEIGHTED]
     out_data = dict()
 
