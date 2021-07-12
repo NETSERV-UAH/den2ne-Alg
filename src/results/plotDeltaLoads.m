@@ -21,7 +21,7 @@ function plotDeltaLoads(delta)
     title("Balance de potencias global - Instante \delta_{" + num2str(delta) + "}")
     ylabel("Potencia (kW)")
     legend("Ideal", "Con perdidas", "Con perdidas y capacidades", 'Location', 'southoutside', 'NumColumns', 3)
-    set(gca,'XTickLabel', {'Criterion 1' 'Criterion 2' 'Criterion 3' 'Criterion 4' 'Criterion 5' });
+    set(gca,'XTickLabel', {'Criterion 1' 'Criterion 2' 'Criterion 3' 'Criterion 4' 'Criterion 5' 'Criterion 6'});
     set(h,'Units','Inches');
     pos = get(h,'Position');
     set(h,'PaperPositionMode','Auto','PaperUnits','Inches','PaperSize',[pos(3), pos(4)])
@@ -40,7 +40,7 @@ function plotDeltaLoads(delta)
     title("Valor absoluto del flujo de potencias - Instante \delta_{" + num2str(delta) + "}")
     ylabel("Potencia (kW)")
     legend("Ideal", "Con perdidas", "Con perdidas y capacidades", 'Location', 'southoutside', 'NumColumns', 3)
-    set(gca,'XTickLabel', {'Criterion 1' 'Criterion 2' 'Criterion 3' 'Criterion 4' 'Criterion 5' });
+    set(gca,'XTickLabel', {'Criterion 1' 'Criterion 2' 'Criterion 3' 'Criterion 4' 'Criterion 5' 'Criterion 6'});
     set(h,'Units','Inches');
     pos = get(h,'Position');
     set(h,'PaperPositionMode','Auto','PaperUnits','Inches','PaperSize',[pos(3), pos(4)])
@@ -55,7 +55,7 @@ function plotDeltaLoads(delta)
     grid on
     title("Perdidas  por propagación e inserción de switches - Instante \delta_{" + num2str(delta) + "}")
     ylabel("Potencia (kW)")
-    set(gca,'XTickLabel', {'Criterion 1' 'Criterion 2' 'Criterion 3' 'Criterion 4' 'Criterion 5' });
+    set(gca,'XTickLabel', {'Criterion 1' 'Criterion 2' 'Criterion 3' 'Criterion 4' 'Criterion 5' 'Criterion 6'});
     set(h,'Units','Inches');
     pos = get(h,'Position');
     set(h,'PaperPositionMode','Auto','PaperUnits','Inches','PaperSize',[pos(3), pos(4)])
@@ -70,7 +70,7 @@ function plotDeltaLoads(delta)
     grid on
     title("Perdidas por exceso en la capacidad del enlace - Instante \delta_{" + num2str(delta) + "}")
     ylabel("Potencia (kW)")
-    set(gca,'XTickLabel', {'Criterion 1' 'Criterion 2' 'Criterion 3' 'Criterion 4' 'Criterion 5' });
+    set(gca,'XTickLabel', {'Criterion 1' 'Criterion 2' 'Criterion 3' 'Criterion 4' 'Criterion 5' 'Criterion 6'});
     set(h,'Units','Inches');
     pos = get(h,'Position');
     set(h,'PaperPositionMode','Auto','PaperUnits','Inches','PaperSize',[pos(3), pos(4)])

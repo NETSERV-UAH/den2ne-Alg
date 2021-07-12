@@ -48,7 +48,7 @@ function plotRangeLoads(init, fin)
     title("Balance de potencias global en promedio")
     ylabel("Potencia (kW)")
     legend("Ideal", "Con perdidas", "Con perdidas y capacidades", 'Location', 'southoutside', 'NumColumns', 3)
-    set(gca,'XTickLabel', {'Criterion 1' 'Criterion 2' 'Criterion 3' 'Criterion 4' 'Criterion 5' });
+    set(gca,'XTickLabel', {'Criterion 1' 'Criterion 2' 'Criterion 3' 'Criterion 4' 'Criterion 5' 'Criterion 6'});
     hold off;
     set(h,'Units','Inches');
     pos = get(h,'Position');
@@ -77,7 +77,7 @@ function plotRangeLoads(init, fin)
     title("Valor absoluto del flujo de potencias en promedio")
     ylabel("Potencia (kW)")
     legend("Ideal", "Con perdidas", "Con perdidas y capacidades", 'Location', 'southoutside', 'NumColumns', 3)
-    set(gca,'XTickLabel', {'Criterion 1' 'Criterion 2' 'Criterion 3' 'Criterion 4' 'Criterion 5' }); 
+    set(gca,'XTickLabel', {'Criterion 1' 'Criterion 2' 'Criterion 3' 'Criterion 4' 'Criterion 5' 'Criterion 6'}); 
     hold off;
     set(h,'Units','Inches');
     pos = get(h,'Position');
@@ -95,7 +95,7 @@ function plotRangeLoads(init, fin)
     grid on
     title("Perdidas  por propagación e inserción de switches en promedio")
     ylabel("Potencia (kW)")
-    set(gca,'XTickLabel', {'Criterion 1' 'Criterion 2' 'Criterion 3' 'Criterion 4' 'Criterion 5' });
+    set(gca,'XTickLabel', {'Criterion 1' 'Criterion 2' 'Criterion 3' 'Criterion 4' 'Criterion 5' 'Criterion 6'});
     hold off;
     set(h,'Units','Inches');
     pos = get(h,'Position');
@@ -113,7 +113,7 @@ function plotRangeLoads(init, fin)
     grid on
     title("Perdidas por exceso en la capacidad del enlace en promedio")
     ylabel("Potencia (kW)")
-    set(gca,'XTickLabel', {'Criterion 1' 'Criterion 2' 'Criterion 3' 'Criterion 4' 'Criterion 5' });
+    set(gca,'XTickLabel', {'Criterion 1' 'Criterion 2' 'Criterion 3' 'Criterion 4' 'Criterion 5' 'Criterion 6'});
     hold off;
     set(h,'Units','Inches');
     pos = get(h,'Position');
