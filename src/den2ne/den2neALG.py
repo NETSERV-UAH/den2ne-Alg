@@ -17,6 +17,7 @@ class Den2ne(object):
     CRITERION_POWER_BALANCE = 2
     CRITERION_POWER_BALANCE_WITH_LOSSES = 3
     CRITERION_LINKS_LOSSES = 4
+    CRITERION_POWER_BALANCE_WEIGHTED = 5
 
     def __init__(self, graph):
         """
@@ -172,6 +173,9 @@ class Den2ne(object):
 
         elif Den2ne.CRITERION_LINKS_LOSSES == criterion:
             self.selectBestID_by_Links_Losses()
+        
+        elif Den2ne.CRITERION_POWER_BALANCE_WEIGHTED == criterion:
+            self.selectBestID_by_Links_Losses()
 
         # Por último, vamos a ver el las dependencias con los switchs y activar aquellos que sean necesarios
         dependences = list(set(sum([active_ids.depends_on for active_ids in self.global_ids], [])))
@@ -288,6 +292,29 @@ class Den2ne(object):
             curr_load -= losses
 
         return losses
+
+    
+    def selectBestID_by_weighted_balance(self):
+        """
+            Función para decidir la mejor ID de un nodo por balance de potencia al root, normalizado por el numero de saltos al mismo
+        """
+        for node in self.G.nodes:
+            norm_balances = [self.getTotalWeightedBalance(id) for id in self.G.nodes[node].ids]
+
+            self.G.nodes[node].ids[norm_balances.index(max(norm_balances))].active = True
+            self.global_ids.append(self.G.nodes[node].getActiveID())
+
+        self.flowInertia()
+
+    def getTotalWeightedBalance(self, id):
+        """
+            Funcion para calcular el balance de potencias normalizado en total de una HLMAC
+        """
+        balance = 0
+        for i in range(0, len(id.hlmac)):
+            balance += self.G.nodes[id.hlmac[i]].load
+
+        return (balance/len(id.hlmac))
 
     def globalBalance(self, withLosses, withCap, withDebugPlot, positions, path):
         """

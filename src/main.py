@@ -73,7 +73,8 @@ def test_ieee123():
     dirs = ['reports', 'csv', 'fig']
     topo_name = 'ieee123'
     criteria = [Den2ne.CRITERION_NUM_HOPS, Den2ne.CRITERION_DISTANCE, Den2ne.CRITERION_LINKS_LOSSES,
-                Den2ne.CRITERION_POWER_BALANCE, Den2ne.CRITERION_POWER_BALANCE_WITH_LOSSES]
+                Den2ne.CRITERION_POWER_BALANCE, Den2ne.CRITERION_POWER_BALANCE_WITH_LOSSES, 
+                Den2ne.CRITERION_POWER_BALANCE_WEIGHTED]
     out_data = dict()
 
     # Preparamos los directorios de resultados
