@@ -145,6 +145,7 @@ def test_ieee123():
 
             # Generamos la configuración logica
             G_den2ne_alg.write_swConfig_CSV(f'results/{topo_name}/csv/swConfig_d{delta}_c{criterion}.csv')
+            
 
         # Exportamos los datos para un valor de delta
         with open(f'results/{topo_name}/csv/outdata_d{delta}.csv', 'w') as file:
@@ -155,7 +156,10 @@ def test_ieee123():
                 file.write(f'{out_data[delta][criterion]["total_balance_with_lossesCap"]},{out_data[delta][criterion]["abs_flux_with_lossesCap"]}\n')
 
     G_den2ne_alg.write_ids_report(f'results/{topo_name}/reports/report_ids.txt')
+    
 
+    #Voy a probar aqui hacer el json
+    G.saveGraph('prueba.json')
 
 if __name__ == "__main__":
     test_ieee123()
