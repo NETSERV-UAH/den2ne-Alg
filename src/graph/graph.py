@@ -335,5 +335,4 @@ class Graph(object):
 
         with open(path, 'w') as file:
             obj_json = json.dumps(self, default=lambda o: o.__dict__, sort_keys=True, indent=4)
-            #print(obj_json)
             file.write(obj_json);
