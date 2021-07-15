@@ -332,20 +332,8 @@ class Graph(object):
         # Mejor lo de dejamos así para ahorrar tiempo. Que sea el usuario quien decida cuando bloquear la ejecución..
         plt.show()
     def saveGraph(self, path):
-        """ Borrar esto
-        self.nodes = dict()
-        self.root = root
-        self.sw_config = self.buildSwitchConfig(switches)
-        self.buildGraph(delta, loads, edges, switches, edges_conf)
-        """
+
         with open(path, 'w') as file:
             obj_json = json.dumps(self, default=lambda o: o.__dict__, sort_keys=True, indent=4)
             #print(obj_json)
             file.write(obj_json);
-            """
-            grafo = {}
-            grafo['nodos']= []
-            #print(self.nodes)
-            json.dump(self.nodes, file, indent=4)
-            json.dump(self.root, file, indent=4)
-            json.dump(self.sw_config, file, indent=4)"""
