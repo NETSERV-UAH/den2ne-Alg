@@ -12,14 +12,19 @@ class Graph(object):
         Clase para gestionar el gráfo que representará la red de distribución eléctrica
     """
 
-    def __init__(self, delta, loads, edges, switches, edges_conf, root='150'):
+    def __init__(self, delta, loads, edges, switches, edges_conf, json_path=None, root='150'):
         """
             Constructor de la clase Graph el cual conformará el grafo a partir de los datos procesados.
         """
         self.nodes = dict()
         self.root = root
         self.sw_config = self.buildSwitchConfig(switches)
-        self.buildGraph(delta, loads, edges, switches, edges_conf)
+        self.json_path = json_path
+        if self.json_path == None:
+            self.buildGraph(delta, loads, edges, switches, edges_conf)
+        else:
+            self.load_json()
+        
 
     def buildGraph(self, delta, loads, edges, switches, edges_conf):
         """
@@ -332,7 +337,44 @@ class Graph(object):
         # Mejor lo de dejamos así para ahorrar tiempo. Que sea el usuario quien decida cuando bloquear la ejecución..
         plt.show()
     def saveGraph(self, path):
-
+        """
+            Función para guardar el grafo en un archivo .json
+        """
         with open(path, 'w') as file:
             obj_json = json.dumps(self, default=lambda o: o.__dict__, sort_keys=True, indent=4)
-            file.write(obj_json);
+            file.write(obj_json)
+
+            """Otra forma manual
+            obj_json = {}
+            obj_json['nodes'] = []
+            print(self.nodes['name'])
+            for n in self.nodes:
+                print(n.name)
+                obj_json['nodes'].append({'name': n.name})
+            print(obj_json)"""
+
+
+    def load_json(self):
+        """
+            Función para cargar el grafo desde un json
+        """
+        path = self.json_path
+        with open(path) as file:
+            data = json.load(file)
+            """
+                Me creo un diccionario auxiliar para acumular todos los valores de los nodos
+                y posteriormente voy creando cada nodo y añadiendo los corresponcientes vecinos
+            """
+            aux = data['nodes'].copy()
+            for i in aux:
+                self.nodes[i] = Node(aux[i]['name'], aux[i]['type'], aux[i]['load'])
+                cont = 0
+                for n in aux[i]['neighbors']:
+                    capacidad = aux[i]['links'][cont]['capacity']
+                    if capacidad == None:
+                        capacidad = 0
+                    self.nodes[i].addNeighbor(n, aux[i]['links'][cont]['type'], aux[i]['links'][cont]['state'], aux[i]['links'][cont]['dist'], aux[i]['links'][cont]['conf'], aux[i]['links'][cont]['coef_R'], (capacidad*1000)/Link.VOLTAGE)
+                    cont +=1
+
+            self.root = data['root']
+            self.sw_config = data['sw_config'].copy()
