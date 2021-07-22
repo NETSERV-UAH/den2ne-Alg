@@ -340,18 +340,84 @@ class Graph(object):
         """
             Función para guardar el grafo en un archivo .json
         """
+        self.json_path= path
         with open(path, 'w') as file:
-            obj_json = json.dumps(self, default=lambda o: o.__dict__, sort_keys=True, indent=4)
-            file.write(obj_json)
+            """Aquí está la forma inmediata pero deja un json intratable"""
+            """obj_json = json.dumps(self, default=lambda o: o.__dict__, sort_keys=True, indent=4)
+            file.write(dic_json)"""
 
-            """Otra forma manual
+            """Otra forma manual que proporciona un json más manejable"""
+            """Lo que hacemos es primero crear un diccionario obj_json que guarda toda la informacion del grafo"""
             obj_json = {}
-            obj_json['nodes'] = []
-            print(self.nodes['name'])
+            obj_json['json_path'] = self.json_path
+            obj_json['nodes'] = {}
             for n in self.nodes:
-                print(n.name)
-                obj_json['nodes'].append({'name': n.name})
-            print(obj_json)"""
+                obj_json['nodes'][n]={}
+                obj_json['nodes'][n]['name'] = self.nodes[n].name 
+                obj_json['nodes'][n]['type'] = self.nodes[n].type
+                obj_json['nodes'][n]['load'] = self.nodes[n].load
+                obj_json['nodes'][n]['neighbors'] = list(self.nodes[n].neighbors)
+                obj_json['nodes'][n]['links'] = list()
+                cont=0
+                for i in obj_json['nodes'][n]['neighbors']:
+                    obj_json['nodes'][n]['links'].append({'node_a': self.nodes[n].links[cont].node_a, 'node_b': self.nodes[n].links[cont].node_b, 'direction': self.nodes[n].links[cont].direction, 'type': self.nodes[n].links[cont].type, 'state': self.nodes[n].links[cont].state, 'dist': self.nodes[n].links[cont].dist, 'conf': self.nodes[n].links[cont].conf, 'coef_R': self.nodes[n].links[cont].coef_R, 'capacity': self.nodes[n].links[cont].capacity})
+                    cont+=1
+                obj_json['nodes'][n]['ids'] = list()
+                cont = 0
+                for j in self.nodes[n].ids:
+                    obj_json['nodes'][n]['ids'].append({'active': self.nodes[n].ids[cont].active, 'depends_on': self.nodes[n].ids[cont].depends_on, 'hlmac': list(), 'used': self.nodes[n].ids[cont].used})
+                    obj_json['nodes'][n]['ids'][cont]['hlmac'] = list(self.nodes[n].ids[cont].hlmac)
+                    cont +=1
+            obj_json['root'] = self.root
+            obj_json['sw_config'] = self.sw_config.copy()
+
+            """Una vez hemos creado obj_json ahora vamos a ir creando el json a mano para así obtenerlo con las tabulaciones que queremos para verlo mucho mejor"""
+            file.write('{\n')
+            file.writelines('\t"json_path": "' + str(obj_json['json_path'])+'",\n')
+            file.write('\t"nodes": {\n')
+            cont1 = 0
+            for i in obj_json['nodes']:
+                if cont1 != 0: #Uso esto para poner las comas si hay más elementos en el diccionario obj_json['nodes']
+                    file.writelines(',\n')
+                cont1+=1
+                file.writelines('\t\t"'+ str(i) +'": {\n')
+                file.writelines('\t\t\t"ids": [\n')
+                cont = 0
+                for j in obj_json['nodes'][i]['ids']:
+                    file.write('\t\t\t\t\t')
+                    file.writelines(json.dumps(obj_json['nodes'][i]['ids'][cont]))
+                    cont+=1
+                    try:
+                        if obj_json['nodes'][i]['ids'][cont]:
+                            file.write(',\n')
+                    except:
+                        file.write('],\n')  
+                file.writelines('\t\t\t"links": [\n')
+                cont = 0
+                for j in obj_json['nodes'][i]['links']:
+                    file.writelines('\t\t\t\t\t'+ json.dumps(obj_json['nodes'][i]['links'][cont]))
+                    cont+=1
+                    try:
+                        if obj_json['nodes'][i]['links'][cont]:
+                            file.write(',\n')
+                    except:
+                        file.write('],\n')  
+                file.writelines('\t\t\t"load": ' + str(obj_json['nodes'][i]['load'])+ ',\n')
+                file.writelines('\t\t\t"name": ' + obj_json['nodes'][i]['name']+ ',\n')
+                file.writelines('\t\t\t"neighbors": ' + json.dumps(obj_json['nodes'][i]['neighbors'])+ ',\n')
+                file.writelines('\t\t\t"type": ' + str(obj_json['nodes'][i]['type'])+ '}')
+            file.write('\n\t'+'},')
+            file.writelines('\t"root": "' + obj_json['root'] + '",\n')
+            file.writelines('\t"sw_config": {\n')
+            for k in obj_json['sw_config']:
+                file.writelines('\t\t"'+ str(k) +'": ' + json.dumps(obj_json['sw_config'][k]))
+                try:
+                    if obj_json['sw_config'][k+1]:
+                        file.write(',\n')
+                except:
+                    file.write('\n')
+            file.write('\t}\n')
+            file.write('}')
 
 
     def load_json(self):

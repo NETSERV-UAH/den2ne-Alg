@@ -160,6 +160,5 @@ def test_ieee123():
     G_den2ne_alg.write_ids_report(f'results/{topo_name}/reports/report_ids.txt')
     
 
-
 if __name__ == "__main__":
     test_ieee123()
