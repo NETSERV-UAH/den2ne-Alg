@@ -342,12 +342,7 @@ class Graph(object):
         """
         self.json_path= path
         with open(path, 'w') as file:
-            """Aquí está la forma inmediata pero deja un json intratable"""
-            """obj_json = json.dumps(self, default=lambda o: o.__dict__, sort_keys=True, indent=4)
-            file.write(dic_json)"""
-
-            """Otra forma manual que proporciona un json más manejable"""
-            """Lo que hacemos es primero crear un diccionario obj_json que guarda toda la informacion del grafo"""
+             #Primero creo un diccionario que acumule todos los datos que vamos a guardar en el json, y luego lo vamos escribiendo en el json de forma manual
             obj_json = {}
             obj_json['json_path'] = self.json_path
             obj_json['nodes'] = {}
@@ -371,7 +366,7 @@ class Graph(object):
             obj_json['root'] = self.root
             obj_json['sw_config'] = self.sw_config.copy()
 
-            """Una vez hemos creado obj_json ahora vamos a ir creando el json a mano para así obtenerlo con las tabulaciones que queremos para verlo mucho mejor"""
+            #Una vez hemos creado obj_json ahora vamos a ir creando el json a mano para así obtenerlo con las tabulaciones que queremos para verlo mucho mejor
             file.write('{\n')
             file.writelines('\t"json_path": "' + str(obj_json['json_path'])+'",\n')
             file.write('\t"nodes": {\n')
@@ -427,10 +422,8 @@ class Graph(object):
         path = self.json_path
         with open(path) as file:
             data = json.load(file)
-            """
-                Me creo un diccionario auxiliar para acumular todos los valores de los nodos
-                y posteriormente voy creando cada nodo y añadiendo los corresponcientes vecinos
-            """
+            #Me creo un diccionario auxiliar para acumular todos los valores de los nodos
+            #y posteriormente voy creando cada nodo y añadiendo los corresponcientes vecinos
             aux = data['nodes'].copy()
             for i in aux:
                 self.nodes[i] = Node(aux[i]['name'], aux[i]['type'], aux[i]['load'])
