@@ -5,21 +5,26 @@ from .node import Node
 from .link import Link
 import networkx as nx
 import matplotlib.pyplot as plt
-
+import json
 
 class Graph(object):
     """
         Clase para gestionar el gráfo que representará la red de distribución eléctrica
     """
 
-    def __init__(self, delta, loads, edges, switches, edges_conf, root='150'):
+    def __init__(self, delta, loads, edges, switches, edges_conf, json_path=None, root='150'):
         """
             Constructor de la clase Graph el cual conformará el grafo a partir de los datos procesados.
         """
         self.nodes = dict()
         self.root = root
         self.sw_config = self.buildSwitchConfig(switches)
-        self.buildGraph(delta, loads, edges, switches, edges_conf)
+        self.json_path = json_path
+        if self.json_path == None:
+            self.buildGraph(delta, loads, edges, switches, edges_conf)
+        else:
+            self.load_json()
+        
 
     def buildGraph(self, delta, loads, edges, switches, edges_conf):
         """
@@ -331,3 +336,104 @@ class Graph(object):
         # He estado a nada de meterme con threads y subprocesos con la librería de python de multiprocessing..
         # Mejor lo de dejamos así para ahorrar tiempo. Que sea el usuario quien decida cuando bloquear la ejecución..
         plt.show()
+    def saveGraph(self, path):
+        """
+            Función para guardar el grafo en un archivo .json
+        """
+        self.json_path= path
+        with open(path, 'w') as file:
+             #Primero creo un diccionario que acumule todos los datos que vamos a guardar en el json, y luego lo vamos escribiendo en el json de forma manual
+            obj_json = {}
+            obj_json['json_path'] = self.json_path
+            obj_json['nodes'] = {}
+            for n in self.nodes:
+                obj_json['nodes'][n]={}
+                obj_json['nodes'][n]['name'] = self.nodes[n].name 
+                obj_json['nodes'][n]['type'] = self.nodes[n].type
+                obj_json['nodes'][n]['load'] = self.nodes[n].load
+                obj_json['nodes'][n]['neighbors'] = list(self.nodes[n].neighbors)
+                obj_json['nodes'][n]['links'] = list()
+                cont=0
+                for i in obj_json['nodes'][n]['neighbors']:
+                    obj_json['nodes'][n]['links'].append({'node_a': self.nodes[n].links[cont].node_a, 'node_b': self.nodes[n].links[cont].node_b, 'direction': self.nodes[n].links[cont].direction, 'type': self.nodes[n].links[cont].type, 'state': self.nodes[n].links[cont].state, 'dist': self.nodes[n].links[cont].dist, 'conf': self.nodes[n].links[cont].conf, 'coef_R': self.nodes[n].links[cont].coef_R, 'capacity': self.nodes[n].links[cont].capacity})
+                    cont+=1
+                obj_json['nodes'][n]['ids'] = list()
+                cont = 0
+                for j in self.nodes[n].ids:
+                    obj_json['nodes'][n]['ids'].append({'active': self.nodes[n].ids[cont].active, 'depends_on': self.nodes[n].ids[cont].depends_on, 'hlmac': list(), 'used': self.nodes[n].ids[cont].used})
+                    obj_json['nodes'][n]['ids'][cont]['hlmac'] = list(self.nodes[n].ids[cont].hlmac)
+                    cont +=1
+            obj_json['root'] = self.root
+            obj_json['sw_config'] = self.sw_config.copy()
+
+            #Una vez hemos creado obj_json ahora vamos a ir creando el json a mano para así obtenerlo con las tabulaciones que queremos para verlo mucho mejor
+            file.write('{\n')
+            file.writelines('\t"json_path": "' + str(obj_json['json_path'])+'",\n')
+            file.write('\t"nodes": {\n')
+            cont1 = 0
+            for i in obj_json['nodes']:
+                if cont1 != 0: #Uso esto para poner las comas si hay más elementos en el diccionario obj_json['nodes']
+                    file.writelines(',\n')
+                cont1+=1
+                file.writelines('\t\t"'+ str(i) +'": {\n')
+                file.writelines('\t\t\t"ids": [\n')
+                cont = 0
+                for j in obj_json['nodes'][i]['ids']:
+                    file.write('\t\t\t\t\t')
+                    file.writelines(json.dumps(obj_json['nodes'][i]['ids'][cont]))
+                    cont+=1
+                    try:
+                        if obj_json['nodes'][i]['ids'][cont]:
+                            file.write(',\n')
+                    except:
+                        file.write('],\n')  
+                file.writelines('\t\t\t"links": [\n')
+                cont = 0
+                for j in obj_json['nodes'][i]['links']:
+                    file.writelines('\t\t\t\t\t'+ json.dumps(obj_json['nodes'][i]['links'][cont]))
+                    cont+=1
+                    try:
+                        if obj_json['nodes'][i]['links'][cont]:
+                            file.write(',\n')
+                    except:
+                        file.write('],\n')  
+                file.writelines('\t\t\t"load": ' + str(obj_json['nodes'][i]['load'])+ ',\n')
+                file.writelines('\t\t\t"name": ' + obj_json['nodes'][i]['name']+ ',\n')
+                file.writelines('\t\t\t"neighbors": ' + json.dumps(obj_json['nodes'][i]['neighbors'])+ ',\n')
+                file.writelines('\t\t\t"type": ' + str(obj_json['nodes'][i]['type'])+ '}')
+            file.write('\n\t'+'},')
+            file.writelines('\t"root": "' + obj_json['root'] + '",\n')
+            file.writelines('\t"sw_config": {\n')
+            for k in obj_json['sw_config']:
+                file.writelines('\t\t"'+ str(k) +'": ' + json.dumps(obj_json['sw_config'][k]))
+                try:
+                    if obj_json['sw_config'][k+1]:
+                        file.write(',\n')
+                except:
+                    file.write('\n')
+            file.write('\t}\n')
+            file.write('}')
+
+
+    def load_json(self):
+        """
+            Función para cargar el grafo desde un json
+        """
+        path = self.json_path
+        with open(path) as file:
+            data = json.load(file)
+            #Me creo un diccionario auxiliar para acumular todos los valores de los nodos
+            #y posteriormente voy creando cada nodo y añadiendo los corresponcientes vecinos
+            aux = data['nodes'].copy()
+            for i in aux:
+                self.nodes[i] = Node(aux[i]['name'], aux[i]['type'], aux[i]['load'])
+                cont = 0
+                for n in aux[i]['neighbors']:
+                    capacidad = aux[i]['links'][cont]['capacity']
+                    if capacidad == None:
+                        capacidad = 0
+                    self.nodes[i].addNeighbor(n, aux[i]['links'][cont]['type'], aux[i]['links'][cont]['state'], aux[i]['links'][cont]['dist'], aux[i]['links'][cont]['conf'], aux[i]['links'][cont]['coef_R'], (capacidad*1000)/Link.VOLTAGE)
+                    cont +=1
+
+            self.root = data['root']
+            self.sw_config = data['sw_config'].copy()

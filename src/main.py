@@ -20,7 +20,7 @@ def usage():
     positions = DataGatherer.getPositions('data/node_positions.csv')
 
     # Creamos la var del grafo para el primer instante
-    G = Graph(0, loads, edges, sw_edges, edges_conf, root='150')
+    G = Graph(0, loads, edges, sw_edges, edges_conf, 'prueba.json', root='150')
 
     # Parseamos a NetworkX y pintamos el grafo
     G.plotGraph(positions, 'IEEE 123 Node test feeder - Graph')
@@ -65,6 +65,8 @@ def usage():
     # Sacamos las figuras en modo iteractivo (Metodo que bloquea el flujo del script)
     G.showGraph()
 
+    #Voy a probar aqui hacer el json
+    G.saveGraph('prueba1.json')
 
 # Vamos a programar unas pruebas globales sobre la topología IEEE 123
 def test_ieee123():
@@ -145,6 +147,7 @@ def test_ieee123():
 
             # Generamos la configuración logica
             G_den2ne_alg.write_swConfig_CSV(f'results/{topo_name}/csv/swConfig_d{delta}_c{criterion}.csv')
+            
 
         # Exportamos los datos para un valor de delta
         with open(f'results/{topo_name}/csv/outdata_d{delta}.csv', 'w') as file:
@@ -155,7 +158,7 @@ def test_ieee123():
                 file.write(f'{out_data[delta][criterion]["total_balance_with_lossesCap"]},{out_data[delta][criterion]["abs_flux_with_lossesCap"]}\n')
 
     G_den2ne_alg.write_ids_report(f'results/{topo_name}/reports/report_ids.txt')
-
+    
 
 if __name__ == "__main__":
     test_ieee123()
