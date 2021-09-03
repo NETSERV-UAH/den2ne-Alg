@@ -6,6 +6,9 @@ import sys
 import time
 
 def prueba(path, criterio):
+    
+    """Función que realiza las pruebas sistemáticas y las guarda en un fichero de texto"""
+
     G = Graph(None, None, None, [], None, path, None)
     datos = dict()
     positions = list()
@@ -37,9 +40,9 @@ def prueba(path, criterio):
     [total_balance_ideal, abs_flux] = G_den2ne_alg.globalBalance(withLosses=False, withCap=False, withDebugPlot=False, positions=positions, path='results/')
     fin = time.time()
 
-    path_json = path.split('/')[-1]
-    path_json = path_json.split('.')[0]
-    path_json = 'resultado_pruebas/' + path_json + '_' + criterio + '.json'
+    #path_json = path.split('/')[-1]
+    #path_json = path_json.split('.')[0]
+    #path_json = 'resultado_pruebas/' + path_json + '_' + criterio + '.json'
     #G.saveGraph(path_json)
     tiempo = fin - inicio
 
@@ -50,7 +53,7 @@ def prueba(path, criterio):
     datos['archivo'] =  path
     #Ahora rellenamos el excel
     with open('pruebas2.txt', 'a') as file:
-        #file.write('Nodos\tModelo\tNode_Placement\tConectividad\tAlpha\tBeta\tCriterio\tBalance_Global\tFlujo Energetico\tTiempo\tArchivo\n')
+        #file.write('Nodos\tModelo\tNode_Placement\tConectividad\tAlpha\tBeta\tCriterio\tBalance_Global\tFlujo Energetico\tTiempo\tArchivo\n') #Esta línea es solo para escribir las cabeceras si el fichero no existe
         file.write(datos['nodos'] + '\t' + datos['modelo'] + '\t' + datos['node_placement'] + '\t' + datos['conectividad'] + '\t' + datos['alpha'] + '\t' + datos['beta'] + '\t' + datos['criterio'] + '\t' + datos['balance_global'] +'\t'+ datos['abs_flux'] + '\t' + datos['tiempo'] + '\t' + datos['archivo'] + '\n')
 
 if __name__ == "__main__":

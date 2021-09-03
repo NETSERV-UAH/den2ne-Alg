@@ -469,7 +469,7 @@ class Graph(object):
                     nodos = int(linea_separado[2])
                     edges = int(linea_separado[4])
                     linea_ultimo_nodo = 3 + nodos
-                    linea_primer_edge = linea_ultimo_nodo + 4
+                    linea_primer_edge = linea_ultimo_nodo + 3 #Para los ficheros generados por la GUI de BRITE poner 4. EL 3 es para los generados por el programa desde la línea de comandos
                     linea_ultimo_edge = linea_primer_edge + edges
                 elif cont >= 4 and cont <= linea_ultimo_nodo: #tratamos los nodos
                     linea_separado = linea.split()
@@ -484,9 +484,6 @@ class Graph(object):
             n_conf = len(list(edges_conf.keys()))
             cargas = asignardatos.cargas_aleatorias(nodos)
             
-            with open('cargas.txt', 'w') as file:
-                for i in cargas:
-                    file.write(str(i) + '\n')
             for i in range(nodos):
                 self.nodes[str(i)] = Node(lista_nodos[i][0], Node.NORMAL, cargas[i]) #Tipo por ahora pongo normal(1)
                 for j in range(edges): #Iteramos con las conexiones de cada nodo para añadir los correspondientes vecinos
