@@ -52,8 +52,8 @@ def prueba(path, criterio):
     datos['tiempo'] = str(tiempo)
     datos['archivo'] =  path
     #Ahora rellenamos el excel
-    with open('pruebas2.txt', 'a') as file:
-        #file.write('Nodos\tModelo\tNode_Placement\tConectividad\tAlpha\tBeta\tCriterio\tBalance_Global\tFlujo Energetico\tTiempo\tArchivo\n') #Esta línea es solo para escribir las cabeceras si el fichero no existe
+    with open('pruebas3.txt', 'a') as file:
+       #file.write('Nodos\tModelo\tNode_Placement\tConectividad\tAlpha\tBeta\tCriterio\tBalance_Global\tFlujo Energetico\tTiempo\tArchivo\n') #Esta línea es solo para escribir las cabeceras si el fichero no existe
         file.write(datos['nodos'] + '\t' + datos['modelo'] + '\t' + datos['node_placement'] + '\t' + datos['conectividad'] + '\t' + datos['alpha'] + '\t' + datos['beta'] + '\t' + datos['criterio'] + '\t' + datos['balance_global'] +'\t'+ datos['abs_flux'] + '\t' + datos['tiempo'] + '\t' + datos['archivo'] + '\n')
 
 if __name__ == "__main__":
