@@ -2,6 +2,9 @@ import random
 """
     Por ahora, para tener distintas formas de producir numeros aleatorios
 """
+
+LIMITE_GLOBAL_CARGA = 250
+
 def conf_edges_aleatorio():
     edges_conf = dict()
     n_conf = random.randint(5, 20)
@@ -12,10 +15,32 @@ def conf_edges_aleatorio():
         edges_conf[i]['section'] = random.randint(0, 100) #Este no lo entiendo muy bien, si ya genero las posiciones en brite, ¿hace falta?
     return edges_conf
 
+#Asigna cargas puramente aleatorias
 def cargas_aleatorias(nodos):
     cargas = list()
     for i in range(nodos):
-        cargas.append(random.uniform(-4, 4))
+        cargas.append(random.uniform(-4, 4)) 
+    return cargas
+
+#Asigna cargas pero la suma de estas no puede se superior a LIMITE_GLOBAL_CARGA
+def cargas_aleatorias_con_limite(nodos):
+    cargas = list()
+    carga_restante = LIMITE_GLOBAL_CARGA
+    for i in range(nodos):
+        if carga_restante == 0: #Si ya no queda más carga global asignamos 0
+            cargas.append(0)
+        else:
+            carga_individual = random.uniform(-4, 4)
+            if carga_restante < abs(carga_individual): #Si lo que queda es menor de lo que ibmaos a signar, asignamos lo que queda
+                cargas.append(carga_restante)
+                carga_restante = 0
+            else: #Si queda suficiente carga
+                carga_restante = carga_restante - abs(carga_individual)
+                cargas.append(carga_individual)
+    random.shuffle(cargas)
+    with open('cargas.txt', 'w') as file:
+        for i in cargas:
+            file.write(str(i) + '\n')
     return cargas
 
 #Ahora con un distribución normal

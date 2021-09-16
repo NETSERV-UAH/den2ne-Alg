@@ -180,7 +180,7 @@ class Den2ne(object):
             self.selectBestID_by_Links_Losses()
         
         elif Den2ne.CRITERION_POWER_BALANCE_WEIGHTED == criterion:
-            self.selectBestID_by_Links_Losses()
+            self.selectBestID_by_weighted_balance()
 
         # Por último, vamos a ver el las dependencias con los switchs y activar aquellos que sean necesarios
         dependences = list(set(sum([active_ids.depends_on for active_ids in self.global_ids], [])))
