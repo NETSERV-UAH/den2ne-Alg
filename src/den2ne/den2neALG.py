@@ -19,6 +19,9 @@ class Den2ne(object):
     CRITERION_LINKS_LOSSES = 4
     CRITERION_POWER_BALANCE_WEIGHTED = 5
 
+    #Fijamos el número máximo de IDs por nodo
+    IDS_MAX = 10
+
     def __init__(self, graph):
         """
             Constructor de la clase Den2ne
@@ -57,6 +60,8 @@ class Den2ne(object):
 
                         # Vamos a comprobar antes de asignar IDs al vecino, que no hay bucles
                         if HLMAC.hlmac_check_loop(curr_node.ids[i], neighbor):
+                            pass
+                        elif len(self.G.nodes[neighbor].ids) >= Den2ne.IDS_MAX:
                             pass
                         else:
                             # Si no hay bucles asignamos la ID al vecino

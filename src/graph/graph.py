@@ -6,6 +6,8 @@ from .link import Link
 import networkx as nx
 import matplotlib.pyplot as plt
 import json
+import random
+import asignardatos
 
 class Graph(object):
     """
@@ -23,8 +25,10 @@ class Graph(object):
         if self.json_path == None:
             self.buildGraph(delta, loads, edges, switches, edges_conf)
         else:
-            self.load_json()
-        
+            if self.json_path.split(".")[-1] == "json":
+                self.load_json()
+            elif self.json_path.split(".")[-1] == "brite":
+                self.load_BRITE()
 
     def buildGraph(self, delta, loads, edges, switches, edges_conf):
         """
@@ -336,11 +340,15 @@ class Graph(object):
         # He estado a nada de meterme con threads y subprocesos con la librería de python de multiprocessing..
         # Mejor lo de dejamos así para ahorrar tiempo. Que sea el usuario quien decida cuando bloquear la ejecución..
         plt.show()
-    def saveGraph(self, path):
+
+    def saveGraph(self, path, json_path = None):#Por ahora el campo json_path es para los test unitarios hasta que se me ocurra otra cosa
         """
             Función para guardar el grafo en un archivo .json
         """
-        self.json_path= path
+        if json_path == None:
+            self.json_path= path
+        else:
+            self.json_path = json_path
         with open(path, 'w') as file:
              #Primero creo un diccionario que acumule todos los datos que vamos a guardar en el json, y luego lo vamos escribiendo en el json de forma manual
             obj_json = {}
@@ -386,7 +394,8 @@ class Graph(object):
                         if obj_json['nodes'][i]['ids'][cont]:
                             file.write(',\n')
                     except:
-                        file.write('],\n')  
+                        continue
+                file.write('],\n')  
                 file.writelines('\t\t\t"links": [\n')
                 cont = 0
                 for j in obj_json['nodes'][i]['links']:
@@ -396,13 +405,14 @@ class Graph(object):
                         if obj_json['nodes'][i]['links'][cont]:
                             file.write(',\n')
                     except:
-                        file.write('],\n')  
+                        continue
+                file.write('],\n')  
                 file.writelines('\t\t\t"load": ' + str(obj_json['nodes'][i]['load'])+ ',\n')
                 file.writelines('\t\t\t"name": ' + obj_json['nodes'][i]['name']+ ',\n')
                 file.writelines('\t\t\t"neighbors": ' + json.dumps(obj_json['nodes'][i]['neighbors'])+ ',\n')
                 file.writelines('\t\t\t"type": ' + str(obj_json['nodes'][i]['type'])+ '}')
             file.write('\n\t'+'},')
-            file.writelines('\t"root": "' + obj_json['root'] + '",\n')
+            file.writelines('\t"root": "' + str(obj_json['root']) + '",\n')
             file.writelines('\t"sw_config": {\n')
             for k in obj_json['sw_config']:
                 file.writelines('\t\t"'+ str(k) +'": ' + json.dumps(obj_json['sw_config'][k]))
@@ -437,3 +447,52 @@ class Graph(object):
 
             self.root = data['root']
             self.sw_config = data['sw_config'].copy()
+
+    def load_BRITE(self, path=None):
+        """
+            Función para cargar un grafo desde BRITE
+        """
+        if path == None:
+            path = self.json_path
+        with open(path) as file:
+            cont = 0
+            nodos = 0
+            edges = 0
+            linea_ultimo_nodo = 0
+            linea_primer_edge = 0
+            linea_ultimo_edge = 0
+            lista_nodos = list()
+            lista_enlaces = list()
+            for linea in file.readlines():
+                if cont == 0: #Primera linea donde nos dice el numero de nodos y enlaces
+                    linea_separado = linea.split()
+                    nodos = int(linea_separado[2])
+                    edges = int(linea_separado[4])
+                    linea_ultimo_nodo = 3 + nodos
+                    linea_primer_edge = linea_ultimo_nodo + 3 #Para los ficheros generados por la GUI de BRITE poner 4. EL 3 es para los generados por el programa desde la línea de comandos
+                    linea_ultimo_edge = linea_primer_edge + edges
+                elif cont >= 4 and cont <= linea_ultimo_nodo: #tratamos los nodos
+                    linea_separado = linea.split()
+                    lista_nodos.append(linea_separado)
+                elif cont >= linea_primer_edge and cont <=linea_ultimo_edge:
+                    linea_separado = linea.split()
+                    lista_enlaces.append(linea_separado)
+                cont += 1
+
+            #Ahora creo los valores aleatorios de las configuraciones de los enlaces
+            edges_conf = asignardatos.conf_edges_aleatorio()
+            n_conf = len(list(edges_conf.keys()))
+            cargas = asignardatos.cargas_aleatorias(nodos)
+            
+            for i in range(nodos):
+                self.nodes[str(i)] = Node(lista_nodos[i][0], Node.NORMAL, cargas[i]) #Tipo por ahora pongo normal(1)
+                for j in range(edges): #Iteramos con las conexiones de cada nodo para añadir los correspondientes vecinos
+                    n_aleatorio = random.randint(0, n_conf-1)
+                    if self.nodes[str(i)].name == lista_enlaces[j][1]:
+                        self.nodes[str(i)].addNeighbor(lista_enlaces[j][2], 1, 'closed', float(lista_enlaces[j][3]), n_aleatorio, edges_conf[n_aleatorio]['coef_r'], edges_conf[n_aleatorio]['i_max'])
+                    elif self.nodes[str(i)].name == lista_enlaces[j][2]:
+                        self.nodes[str(i)].addNeighbor(lista_enlaces[j][1], 1, 'closed', float(lista_enlaces[j][3]), n_aleatorio, edges_conf[n_aleatorio]['coef_r'], edges_conf[n_aleatorio]['i_max'])
+            
+            self.root = str(random.choice(list(self.nodes.keys())))
+            self.json_path = None
+            self.sw_config = dict()
