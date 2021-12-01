@@ -18,43 +18,49 @@ def prueba(path, criterio):
             if cont == 1:
                 linea = linea.split()
                 datos['nodos'] = linea[4]
-                datos['modelo'] = linea[3].split(')')[0]
+                datos['modelo'] = 'ASWaxman'
                 datos['node_placement'] = linea[7]
-                datos['conectividad'] = linea[8]
-                datos['alpha'] = linea[9][:4]
-                datos['beta'] = linea[10][:4]
+                datos['conectividad'] = linea[9]
+                datos['alpha'] = linea[10][:4]
+                datos['beta'] = linea[11][:4]
             elif cont >= 4 and cont <= (3 + int(datos['nodos'])):
                 linea = linea.split()
                 positions.append(dict())
                 positions[cont-4]['node'] = linea[0]
-                positions[cont-4]['x'] = int(linea[1])
-                positions[cont-4]['y'] = int(linea[2])
+                positions[cont-4]['x'] = float(linea[1])
+                positions[cont-4]['y'] = float(linea[2])
             cont += 1
     
     #Algoritmo
     inicio = time.time()
     G_den2ne_alg = Den2ne(G)
+    inicio_ids = time.time()
     G_den2ne_alg.spread_ids()
+    fin_ids = time.time()
     #Ahora seleccionamos las IDS por el criterio
     G_den2ne_alg.selectBestIDs(int(criterio))
-    [total_balance_ideal, abs_flux] = G_den2ne_alg.globalBalance(withLosses=False, withCap=False, withDebugPlot=False, positions=positions, path='results/')
+    inicio_globalbalance = time.time()
+    [total_balance_ideal, abs_flux] = G_den2ne_alg.globalBalance(withLosses=True, withCap=True, withDebugPlot=False, positions=positions, path='results/')
+    fin_globalbalance = time.time()
     fin = time.time()
 
-    #path_json = path.split('/')[-1]
-    #path_json = path_json.split('.')[0]
-    #path_json = 'resultado_pruebas/' + path_json + '_' + criterio + '.json'
-    #G.saveGraph(path_json)
     tiempo = fin - inicio
+    tiempo_ids = fin_ids - inicio_ids
+    tiempo_globalbalance = fin_globalbalance - inicio_globalbalance
 
     datos['criterio'] = criterio
     datos['balance_global'] = str(abs(total_balance_ideal))
     datos['abs_flux'] = str(abs_flux)
     datos['tiempo'] = str(tiempo)
+    datos['tiempo_ids'] = str(tiempo_ids)
+    datos['tiempo_globalbalance'] = str(tiempo_globalbalance)
     datos['archivo'] =  path
+    datos['conf_perdidas'] = 'Losses and Capacity'
+
     #Ahora rellenamos el excel
-    with open('pruebas3.txt', 'a') as file:
-       #file.write('Nodos\tModelo\tNode_Placement\tConectividad\tAlpha\tBeta\tCriterio\tBalance_Global\tFlujo Energetico\tTiempo\tArchivo\n') #Esta línea es solo para escribir las cabeceras si el fichero no existe
-        file.write(datos['nodos'] + '\t' + datos['modelo'] + '\t' + datos['node_placement'] + '\t' + datos['conectividad'] + '\t' + datos['alpha'] + '\t' + datos['beta'] + '\t' + datos['criterio'] + '\t' + datos['balance_global'] +'\t'+ datos['abs_flux'] + '\t' + datos['tiempo'] + '\t' + datos['archivo'] + '\n')
+    with open('ConSemilla.txt', 'a') as file:
+       #file.write('Nodos\tModelo\tNode_Placement\tConectividad\tAlpha\tBeta\tCriterio\tConf_Perdidas\tBalance_Global\tFlujo Energetico\tTiempo\tTiempo creando las IDs\tTiempo GlobalBalance\tArchivo\n') #Esta línea es solo para escribir las cabeceras si el fichero no existe
+       file.write(datos['nodos'] + '\t' + datos['modelo'] + '\t' + datos['node_placement'] + '\t' + datos['conectividad'] + '\t' + datos['alpha'] + '\t' + datos['beta'] +'\t' + datos['criterio'] + '\t' + datos['conf_perdidas'] + '\t' + datos['balance_global'] +'\t'+ datos['abs_flux'] + '\t' + datos['tiempo'] + '\t' + datos['tiempo_ids'] + '\t' + datos['tiempo_globalbalance'] + '\t' + datos['archivo'] + '\n')
 
 if __name__ == "__main__":
     if (len(sys.argv)!=3):
