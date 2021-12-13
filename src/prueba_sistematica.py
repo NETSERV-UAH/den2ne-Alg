@@ -2,7 +2,7 @@
 
 from graph.graph import Graph
 from den2ne.den2neALG import Den2ne
-import BRITE_interface.BRITE_interface as BRITE_interface
+import dataCollector.brite_intf as BRITE_interface
 import sys
 import time
 
