@@ -16,9 +16,9 @@ TOPO_BEHAVIORAL=0
 TOPO_LOAD_LIMIT=0
 TOPO_RUNS=10
 
-echo "[$(date)][INFO] Inicio de las pruebas ... "
-echo "[$(date)][INFO] Leyendo topogias del dir: $(pwd)/${TOPO_DIR}"
-echo "[$(date)][INFO] Escribiendo resultados en la raiz de las pruebas ${RESULT_DIR}"
+echo "[$(date +%T)][INFO] Inicio de las pruebas ... "
+echo "[$(date +%T)][INFO] Leyendo topogias del dir: $(pwd)/${TOPO_DIR}"
+echo "[$(date +%T)][INFO] Escribiendo resultados en la raiz de las pruebas ${RESULT_DIR}"
 
 # Main loops
 for topo_name in ${TOPO_NAMES[@]}
@@ -31,7 +31,7 @@ do
             do
                 for topo_criterion in ${TOPO_CRITERIONS[@]}
                 do 
-                    echo "[$(date)][INFO] RUNNING: python3 test_topo.py ${RESULT_DIR} ${TOPO_DIR}/${topo_name}-${topo_num_node}-${topo_dregree}/seed_${topo_seed}/ ${topo_seed} ${topo_criterion} ${TOPO_BEHAVIORAL} ${TOPO_LOAD_LIMIT} ${TOPO_RUNS}"
+                    echo "[$(date +%T)][INFO] RUNNING: python3 test_topo.py ${RESULT_DIR} ${TOPO_DIR}/${topo_name}-${topo_num_node}-${topo_dregree}/seed_${topo_seed}/ ${topo_seed} ${topo_criterion} ${TOPO_BEHAVIORAL} ${TOPO_LOAD_LIMIT} ${TOPO_RUNS}"
                     python3 test_topo.py ${RESULT_DIR} ${TOPO_DIR}/${topo_name}-${topo_num_node}-${topo_dregree}/seed_${topo_seed}/ ${topo_seed} ${topo_criterion} ${TOPO_BEHAVIORAL} ${TOPO_LOAD_LIMIT} ${TOPO_RUNS}
                 done
             done
@@ -39,4 +39,4 @@ do
     done
 done
 
-echo "[$(date)][INFO] Fin de las pruebas ... "
+echo "[$(date +%T)][INFO] Fin de las pruebas ... "
