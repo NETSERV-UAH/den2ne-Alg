@@ -1,5 +1,4 @@
 #!/usr/bin/python3
-
 from graph.graph import Graph
 from den2ne.den2neALG import Den2ne
 import dataCollector.brite_intf as BRITE_interface
