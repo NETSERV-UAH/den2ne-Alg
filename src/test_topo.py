@@ -17,13 +17,13 @@ def prueba(path_results, path_topology, topo_seed, criterion, conf_losses, load_
     """
     Obj: Realizar las pruebas sistemáticas y guardar los resultados en un fichero de texto.
     ### PARÁMETROS ###
-    - path_results (path) -> Path del directorio en el que se almacenarán los resultados (empezado por ./) Ejemplo: ./results
-    - path_topology (path) -> Path del directorio donde se encuentran los ficheros de la topología en especifico (empieza por ./) Ejemplo: ./data/topos/waxman-30-4/seed_5/
-    - topo_seed (int[1,10])-> Semilla de la topología. Va implícita en path_topology pero para evitar buscar (Tienen que coincidir) Ejemplo: 5 (por seed_5)
-    - criterion (int[0,4])-> Índice del criterio elegido de la lista de criterios que se encuentra en ./den2ne/den2neALG.py
+    - path_results (path)   -> Path del directorio en el que se almacenarán los resultados (empezado por ./) Ejemplo: ./results
+    - path_topology (path)  -> Path del directorio donde se encuentran los ficheros de la topología en especifico (empieza por ./) Ejemplo: ./data/topos/waxman-30-4/seed_5/
+    - topo_seed (int[1,10]) -> Semilla de la topología. Va implícita en path_topology pero para evitar buscar (Tienen que coincidir) Ejemplo: 5 (por seed_5)
+    - criterion (int[0,4])  -> Índice del criterio elegido de la lista de criterios que se encuentra en ./den2ne/den2neALG.py
     - conf_losses (int[0,3])-> Índice de elección del escenario de pérdidas. Modifica valores de withLosses y withCap. 4 posibles escenarios
-    - load_limit (int[0,1])-> Existencia o no de límite de carga: (Si=1-No=0)
-    - n_runs (int) -> Número de ejecuciones que servirán para fijar la semilla de ejecución
+    - load_limit (int[0,1]) -> Existencia o no de límite de carga: (Si=1-No=0)
+    - n_runs (int)          -> Número de ejecuciones que servirán para fijar la semilla de ejecución
     ##################
     """
 
