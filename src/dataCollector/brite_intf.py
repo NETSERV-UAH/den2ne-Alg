@@ -49,7 +49,8 @@ def cargas_aleatorias(node_file, semilla):
     """
     random.seed(semilla)
     loads = dict()
-    n_nodos = int(node_file.split('/')[-4])  #Así independientemente del path, selecciona el 4 valor empezando por el final, es decir, el número de nodos
+    n_nodos = node_file.split('-')[2]
+    n_nodos = int(n_nodos.split('/')[0])
     for nodo in range(n_nodos):
         loads[str(nodo)] = list()
         loads[str(nodo)].append(random.uniform(-4, 4))
