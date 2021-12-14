@@ -1,8 +1,8 @@
 #!/bin/bash
 
 # Global PATH vars
-RESULT_DIR='results'
-TOPO_DIR='data/topos'
+RESULT_DIR='./results'
+TOPO_DIR='./data/topos'
 
 # Experiment vars
 TOPO_NAMES=('barabasi' 'waxman')
