@@ -49,8 +49,7 @@ def cargas_aleatorias(node_file, semilla):
     """
     random.seed(semilla)
     loads = dict()
-    n_nodos = node_file.split('-')[2]
-    n_nodos = int(n_nodos.split('/')[0])
+    n_nodos = int(node_file.split('-')[1])
     for nodo in range(n_nodos):
         loads[str(nodo)] = list()
         loads[str(nodo)].append(random.uniform(-4, 4))
@@ -63,9 +62,8 @@ def cargas_aleatorias_con_limite(node_file, semilla):
     random.seed(semilla)
     loads = dict()
     cargas = list() #Variable auxiliar para luego hacer el shuffle
-    n_nodos = node_file.split('-')[2]
-    n_nodos = int(n_nodos.split('/')[0])
     carga_restante = LIMITE_GLOBAL_CARGA
+    n_nodos = int(node_file.split('-')[1])
     for nodo in range(n_nodos):
         if carga_restante == 0: #Si ya no queda más carga global asignamos 0
             cargas.append(0)
@@ -89,7 +87,6 @@ def selectRoot(node_file, seed):
         Lo pongo aquí para usar el módulo random solamente aquí
     """
     random.seed(seed)
-    n_nodos = node_file.split('-')[2]
-    n_nodos = int(n_nodos.split('/')[0])
+    n_nodos = int(node_file.split('-')[1])
     root = str(random.randint(0, n_nodos - 1))
     return root
