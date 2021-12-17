@@ -51,7 +51,6 @@ def cargas_aleatorias(node_file, semilla):
     loads = dict()
     n_nodos = node_file.split('-')[1]
     n_nodos = int(n_nodos.split('/')[0])
-    print()
     for nodo in range(n_nodos):
         loads[str(nodo)] = list()
         loads[str(nodo)].append(random.uniform(-4, 4))
