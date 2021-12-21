@@ -2,6 +2,7 @@
 from graph.graph import Graph
 from den2ne.den2neALG import Den2ne
 import dataCollector.brite_intf as BRITE_interface
+from dataCollector.dataCollector import DataGatherer
 import sys
 import time
 import os
@@ -59,7 +60,7 @@ def prueba(path_results, path_topology, topo_seed, criterion, conf_losses, load_
         else:
             loads = BRITE_interface.cargas_aleatorias(node_file, seed_run)
 
-        edges_conf = BRITE_interface.conf_edges_aleatorio(seed_run)
+        edges_conf = DataGatherer.getEdges_Config('data/links_config.csv')
         edges = BRITE_interface.BRITEedges(edge_file, edges_conf, seed_run)
         positions = BRITE_interface.BRITEpositions(node_file)
         root = BRITE_interface.selectRoot(node_file, seed_run)
