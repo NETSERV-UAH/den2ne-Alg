@@ -1,15 +1,20 @@
-function data_csv = gather_csv(path)
-    total_criteria=6;
-    total_seeds = 10;
-    %Iniciar célula de matrices a 0 
-    data_csv = cell(total_criteria,total_seeds);
-    %en los archivos el criterio va de c0 a c6. En matlab empieza en 1 por
-    %tanto se resta c1 - 1 = c0 
-    for criteria=1:total_criteria
-        criterio = criteria -1;
-        for seed=1:total_seeds
-            %disp(path + "outdata_seed_" + seed+ "_c_" + criterio + ".csv")
-            data_csv{criteria, seed} = seg2mseg(importdata(path + "outdata_seed_" + seed+ "_c_" + criterio + ".csv"));
+%% Función para recolectar datos de todas las semillas de una topología
+%
+%   [+] Autores: David Hernández Puerta <d.hernandezp@edu.uah.es>
+%                Javier Díaz Fuentes <j.diazf@edu.uah.es>
+%                David Carrascal <david.carrascal@uah.es> 
+%
+%   [+] Fecha: 22 Dic 2021
+
+function data_out_csv = gather_csv(PATH_TOPO, TOPO_CRITERIONS, TOPO_SEEDS, TOPO_RUNS)
+
+    % Start topo out data structure
+    data_out_csv = cell(length(TOPO_CRITERIONS),length(TOPO_SEEDS));
+
+    % Main loop
+    for criteria_index=0:length(TOPO_CRITERIONS)-1
+        for seed_index=0:length(TOPO_SEEDS)-1
+            data_out_csv{criteria_index + 1, seed_index +1} = importdata(PATH_TOPO + "outdata_seed_" + TOPO_SEEDS(seed_index + 1)+ "_c_" + TOPO_CRITERIONS(criteria_index + 1) + ".csv");
         end
     end
 end 
