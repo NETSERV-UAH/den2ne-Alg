@@ -1,0 +1,22 @@
+%exp_loadLimit_0_behavioral_0
+%load_Limit = [0, 1];
+%behavioral = [0, 1 ,2 ,3];
+
+%f_objetivo es lo que queremos ver en el eje de las y:
+% puede ser f_objetivo=1-> Semilla
+% puede ser f_objetivo=2-> Balance Global
+% puede ser f_objetivo=3->abs_flux
+% puede ser f_objetivo=4-> Tiempo IDs
+% puede ser f_objetivo=5-> Tiemppo convergencia cargas
+f_objetivo = 1;
+
+
+for load_limit=1:2
+    title_load_limit = load_limit-1;
+    for behavioral=1:4
+        title_behavioral= behavioral-1;
+        titulo = "exp_loadLimit_"+ title_load_limit + "_behavioral_"+ title_behavioral;
+        figure
+        graficar_exp_loadlimit_X_behavioral_Y(datos{load_limit,behavioral}, titulo, f_objetivo);
+    end
+end
