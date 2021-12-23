@@ -54,9 +54,28 @@ else
 end
 
 
-% Second, we are going to plot all the results
+
+% Second, post-processing data
 for limit_index=0:length(TOPO_LOAD_LIMIT)-1
     for behavioral_index=0:length(TOPO_BEHAVIORAL)-1
-        plot_experiments(data{load_limit,behavioral}, PLOT_MEAS, TOPO_NAMES, TOPO_NUM_NODES, TOPO_DEGREES, TOPO_CRITERIONS, TOPO_BEHAVIORAL, TOPO_LOAD_LIMIT, TOPO_SEEDS, TOPO_RUNS);
+        for model_index=0:length(TOPO_NAMES)-1
+            for node_index=0:length(TOPO_NUM_NODES)-1
+                for degree_index=0:length(TOPO_DEGREES)-1
+                    for criteria_index=0:length(TOPO_CRITERIONS)-1
+                        for seed_index=0:length(TOPO_SEEDS)-1
+                            seg2mseg(data{limit_index + 1, behavioral_index + 1}{model_index + 1, node_index + 1, degree_index + 1}{criteria_index + 1, seed_index +1});
+                        end
+                    end
+                end
+            end
+        end
+    end
+end
+
+% Third, we are going to plot all the results
+for limit_index=0:length(TOPO_LOAD_LIMIT)-1
+    for behavioral_index=0:length(TOPO_BEHAVIORAL)-1
+        title = "exp_loadLimit_" + TOPO_LOAD_LIMIT(limit_index + 1) + "_behavioral_" + TOPO_BEHAVIORAL(behavioral_index + 1);
+        plot_experiments(data{limit_index +1,behavioral_index+1}, title, PLOT_MEAS, TOPO_NAMES, TOPO_NUM_NODES, TOPO_DEGREES, TOPO_CRITERIONS, TOPO_SEEDS);
     end
 end
