@@ -84,79 +84,95 @@ class Den2ne(object):
             # Por último desalojamos al nodo atendido
             nodes_to_attend.pop(0)
 
-    def flowInertia(self):
+    def flowInertia(self, ids_to_fix=None, n_repetition=None):
         """
             Función para preservar la coherencia en el grafo de los distintos flujos
         """
+        if ids_to_fix != None:  # Si no es la primera llamada de flowInertia, entonces cogemos las ids que no se han cambiado para tratar con ellas
+            ids_list = ids_to_fix
+        else:   # Si es la primera vez que se llama a flowInertia, se ejecuta seleccionando las IDs más grandes
+            # Vamos a ordenar la lista de globals ids
+            self.global_ids.sort(key=Den2ne.key_sort_by_HLMAC_len, reverse=True)
+            ids_list =  [j for j in self.global_ids if len(self.global_ids[0].hlmac) == len(j.hlmac)]
+        for ids_max_len in ids_list:
+            for i in range(len(ids_max_len.hlmac)-2, 0, -1):
 
-        # Vamos a ordenar la lista de globals ids
-        self.global_ids.sort(key=Den2ne.key_sort_by_HLMAC_len, reverse=True)
+                # Vamos a ver la ID más larga en el camino hacia el root
+                nextNode = self.G.nodes[ids_max_len.hlmac[i]]
 
-        for i in range(len(self.global_ids[0].hlmac)-2, 0, -1):
+                # Miramos el index que debería haber
+                nextID = nextNode.ids[nextNode.getIndexID(ids_max_len.hlmac[0:i+1])]
 
-            # Vamos a ver la ID más larga en el camino hacia el root
-            nextNode = self.G.nodes[self.global_ids[0].hlmac[i]]
+                if nextID not in self.global_ids:
+                    # Sacamos la ID antigua de la lista
+                    self.global_ids.remove(nextNode.getActiveID())
 
-            # Miramos el index que debería haber
-            nextID = nextNode.ids[nextNode.getIndexID(self.global_ids[0].hlmac[0:i+1])]
+                    # Establecemos como activa la nueva ID
+                    self.G.nodes[ids_max_len.hlmac[i]].ids[nextNode.ids.index(nextNode.getActiveID())].active = False
+                    self.G.nodes[ids_max_len.hlmac[i]].ids[nextNode.ids.index(nextID)].active = True
 
-            if nextID not in self.global_ids:
-                # Sacamos la ID antigua de la lista
-                self.global_ids.remove(nextNode.getActiveID())
+                    # Actualizamos la lista
+                    self.global_ids.append(nextID)
 
-                # Establecemos como activa la nueva ID
-                self.G.nodes[self.global_ids[0].hlmac[i]].ids[nextNode.ids.index(nextNode.getActiveID())].active = False
-                self.G.nodes[self.global_ids[0].hlmac[i]].ids[nextNode.ids.index(nextID)].active = True
+                    # Por último, notificamos a nuestros vecinos de la ramas anexas a la rama
+                    # principal, para que sean conscientes de la incercia que está ocurriendo
+                    # en aras de que entregen su potencia, antes que se recorra el camino principal
+                    for neighbor in nextNode.neighbors:
 
-                # Actualizamos la lista
-                self.global_ids.append(nextID)
+                        # Para que sea un vecino valido no tiene que ser ni el nextHop ni el anterior
+                        if neighbor not in ids_max_len.hlmac: #Pongo esto porque si está en la id principal ya lo vamos a revisar más tarde y es tiempo de computo perdido creo yo
 
-                # Por último, notificamos a nuestros vecinos de la ramas anexas a la rama
-                # principal, para que sean conscientes de la incercia que está ocurriendo
-                # en aras de que entregen su potencia, antes que se recorra el camino principal
-                for neighbor in nextNode.neighbors:
+                            # En este punto desconocemos la longitud de la rama.. por ello vamos a recorrerla con un while
+                            branch_nodes_to_attend = [neighbor]
+                            branch_nodes_to_attended = [nextNode.name]
 
-                    # Para que sea un vecino valido no tiene que ser ni el nextHop ni el anterior
-                    if neighbor != self.global_ids[0].hlmac[i+1] and neighbor != self.global_ids[0].hlmac[i-1]:
+                            while len(branch_nodes_to_attend) > 0:
 
-                        # En este punto desconocemos la longitud de la rama.. por ello vamos a recorrerla con un while
-                        branch_nodes_to_attend = [neighbor]
-                        branch_nodes_to_attended = [nextNode.name]
+                                # Hay que visitar todos los vecinos de la rama que no hayan sido visitados
+                                curr_node = self.G.nodes[branch_nodes_to_attend[0]]
+                                # Bucle de exploración, comprobamos que no hayan sido visitados
+                                # Atendemos al nodo en cuestión, si su HLMAC es más corta que el nodo de la rama
+                                # principal, hay un problema.. hay que cambiar la HLMAC activa por la HLMAC que siga la incercia del
+                                # camino principal
+                                # Creo que esto deberíamos hacerlo solo si su anterior paso es el nodo que hemos cambiado
+                                # es decir, si en este caso hemos cambiado el 0, solo cambiar los que en su ids tengan un 0
+                                if nextID.getOrigin() in curr_node.getActiveID().hlmac:
+                                    # Entonces este nodo está utilizando el nodo cuya ids hemos cambiado
+                                    # Tenemos que revisar que esta ID esté bien
+                                    if len(curr_node.getActiveID().hlmac) <= len(nextID.hlmac) or nextID.hlmac.index(nextNode.name) != curr_node.getActiveID().hlmac.index(nextNode.name):
+                                        possible_id = list()
+                                        # Con la conectividad alta pueden darse casos que incluyan todos los nodos necesarios, más unos extras que no se corresponden con la id que queremos
+                                        # Entonces lo que hacemos es guardar todas las ids que cumplen la condición de los saltos, y cogemos la más pequeña, que es la que tiene los saltos necesarios, sin extras
+                                        for id in curr_node.ids:
+                                            if all(hop in id.hlmac for hop in nextID.hlmac):
+                                                possible_id.append(id)
+                                        if possible_id:
+                                            possible_id.sort(key=Den2ne.key_sort_by_HLMAC_len) # Cogemos la más pequeña
+                                            # Sacamos la ID antigua de la lista
+                                            self.global_ids.remove(curr_node.getActiveID())
 
-                        while len(branch_nodes_to_attend) > 0:
+                                            # Marcamos como activa la nueva ID
+                                            self.G.nodes[branch_nodes_to_attend[0]].ids[curr_node.ids.index(curr_node.getActiveID())].active = False
+                                            self.G.nodes[branch_nodes_to_attend[0]].ids[curr_node.ids.index(possible_id[0])].active = True
 
-                            # Hay que visitar todos los vecinos de la rama que no hayan sido visitados
-                            curr_node = self.G.nodes[branch_nodes_to_attend[0]]
+                                            # Añadidmos la nueva ID a la lista
+                                            self.global_ids.append(possible_id[0])
+                                            # Si cambiamos la id, añadimos los vecinos a revisar
+                                            for neig in curr_node.neighbors:
+                                                if neig not in branch_nodes_to_attended:
+                                                    branch_nodes_to_attend.append(neig)
 
-                            # Bucle de exploración, comprobamos que no hayan sido visitados
-                            for neig in curr_node.neighbors:
-                                if neig not in branch_nodes_to_attended:
-                                    branch_nodes_to_attend.append(neig)
-
-                            # Atendemos al nodo en cuestión, si su HLMAC es más corta que el nodo de la rama
-                            # principal, hay un problema.. hay que cambiar la HLMAC activa por la HLMAC que siga la incercia del
-                            # camino principal
-                            if len(curr_node.getActiveID().hlmac) <= len(nextID.hlmac):
-                                for id in curr_node.ids:
-                                    if all(hop in id.hlmac for hop in nextID.hlmac):
-                                        # Sacamos la ID antigua de la lista
-                                        self.global_ids.remove(curr_node.getActiveID())
-
-                                        # Marcamos como activa la nueva ID
-                                        self.G.nodes[branch_nodes_to_attend[0]].ids[curr_node.ids.index(curr_node.getActiveID())].active = False
-                                        self.G.nodes[branch_nodes_to_attend[0]].ids[curr_node.ids.index(id)].active = True
-
-                                        # Añadidmos la nueva ID a la lista
-                                        self.global_ids.append(id)
-
-                            else:
-                                # Si en una rama la ID activa ya cumple la condición, los nodos de atrás de la rama habrán elegido la misma
-                                # ID, ya que el camino es cte para todos ellos.
-                                break
-
-                            # Desalojamos al nodo atendido, y lo marcamos como atendido
-                            branch_nodes_to_attended.append(curr_node.name)
-                            branch_nodes_to_attend.pop(0)
+                                    # Desalojamos al nodo atendido, y lo marcamos como atendido
+                                    branch_nodes_to_attended.append(curr_node.name)
+                                    branch_nodes_to_attend.pop(0)
+                                else:
+                                    # Desalojamos al nodo atendido, y lo marcamos como atendido
+                                    branch_nodes_to_attended.append(curr_node.name)
+                                    branch_nodes_to_attend.pop(0)
+        # Una vez realizado flow inertia revisamos que los ids sean correctos
+        # Para evitar bucles infinitos pasamos el parámetro repeticion
+        if n_repetition == None or n_repetition <=10:
+            self.IDsCheck(n_repetition)
 
     def selectBestIDs(self, criterion):
         """
@@ -214,6 +230,9 @@ class Den2ne(object):
             self.G.nodes[node].ids[dists.index(min(dists))].active = True
             self.global_ids.append(self.G.nodes[node].getActiveID())
 
+        self.flowInertia()
+
+
     def getTotalDistance(self, id):
         """
             Funcion para calcular la distancia total de una HLMAC
@@ -234,6 +253,8 @@ class Den2ne(object):
             self.G.nodes[node].ids[balances.index(max(balances))].active = True
             self.global_ids.append(self.G.nodes[node].getActiveID())
 
+        #self.G.saveGraph("comprobar/barabasi-10-4/den2ne_flowInertiac2.json")
+        #self.comprobarIDs()
         self.flowInertia()
 
     def getTotalBalance(self, id):
@@ -280,6 +301,8 @@ class Den2ne(object):
 
             self.G.nodes[node].ids[losses.index(min(losses))].active = True
             self.global_ids.append(self.G.nodes[node].getActiveID())
+       
+        self.flowInertia()
 
     def getTotalLinks_Losses(self, id):
         """
@@ -320,6 +343,23 @@ class Den2ne(object):
             balance += self.G.nodes[id.hlmac[i]].load
 
         return (balance/len(id.hlmac))
+
+    def IDsCheck(self, n_repetition=0):
+        """
+            Función que revisa que todas las IDs seleccionadas son coherentes 
+            y por tanto no se quedará carga en nodos distintos al root 
+        """
+        ids_to_fix = list()
+        if n_repetition == None:
+            n_repetition=0
+        else:
+            n_repetition = n_repetition +1
+        for i in self.global_ids:
+            nextHop = i.getNextHop()
+            if nextHop != None and self.G.nodes[nextHop].getActiveID().hlmac.index(nextHop) > i.hlmac.index(nextHop):
+                ids_to_fix.append(i)
+        if len(ids_to_fix) != 0:
+            self.flowInertia(ids_to_fix, n_repetition)
 
     def globalBalance(self, withLosses, withCap, withDebugPlot, positions, path):
         """
@@ -421,6 +461,16 @@ class Den2ne(object):
 
         # Devolvemos el balance total
         return [self.G.nodes[self.root].load, abs_flux]
+
+    def comprobacionCargas(self):
+        """Funcion para ver que nodos se quedan con cargas"""
+        for node in self.G.nodes:
+            if self.G.nodes[node].load != 0:
+                if node != self.G.root:
+                    return False
+        else: 
+            return True
+
 
     @ staticmethod
     def key_sort_by_HLMAC_len(id):
