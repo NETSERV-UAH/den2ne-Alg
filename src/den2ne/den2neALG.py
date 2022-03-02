@@ -253,8 +253,6 @@ class Den2ne(object):
             self.G.nodes[node].ids[balances.index(max(balances))].active = True
             self.global_ids.append(self.G.nodes[node].getActiveID())
 
-        #self.G.saveGraph("comprobar/barabasi-10-4/den2ne_flowInertiac2.json")
-        #self.comprobarIDs()
         self.flowInertia()
 
     def getTotalBalance(self, id):
