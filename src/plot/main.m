@@ -12,10 +12,10 @@ clear variables
 % Paths
 PATH_RESUTLS_DIR = '../results/';
 PATH_RESUTLS_MAT_DATA = './';
-PATH_OUTPUT_FIG_PDF = './fig/';
+PATH_OUTPUT_FIG_PDF = './fig';
 
 % Name 
-NAME_RESUTLS = 'results_v3';
+NAME_RESUTLS = 'results_v5';
 
 % Script flags
 SAVE_FIG = true;
@@ -24,7 +24,7 @@ SAVE_FIG = true;
 TOPO_NAMES = ["barabasi" , "waxman"];
 TOPO_NUM_NODES = 10:10:200;
 TOPO_DEGREES = 2:2:6;
-TOPO_CRITERIONS = 0:1:5;
+TOPO_CRITERIONS = 0:1:4;
 TOPO_BEHAVIORAL = 0:1:3;
 TOPO_LOAD_LIMIT = 0:1:1;
 TOPO_SEEDS = 1:1:10;
@@ -76,6 +76,6 @@ end
 for limit_index=0:length(TOPO_LOAD_LIMIT)-1
     for behavioral_index=0:length(TOPO_BEHAVIORAL)-1
         title = "exp_loadLimit_" + TOPO_LOAD_LIMIT(limit_index + 1) + "_behavioral_" + TOPO_BEHAVIORAL(behavioral_index + 1);
-        plot_experiments(data{limit_index +1,behavioral_index+1}, title, PLOT_MEAS, TOPO_NAMES, TOPO_NUM_NODES, TOPO_DEGREES, TOPO_CRITERIONS, TOPO_SEEDS);
+        plot_experiments(data{limit_index +1,behavioral_index+1}, title, PATH_OUTPUT_FIG_PDF, PLOT_MEAS, TOPO_NAMES, TOPO_NUM_NODES, TOPO_DEGREES, TOPO_CRITERIONS, TOPO_SEEDS);
     end
 end

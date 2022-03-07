@@ -6,7 +6,7 @@
 %
 %   [+] Fecha: 22 Dic 2021
 
-function plot_experiments(data_exp, title, PLOT_MEAS, TOPO_NAMES, TOPO_NUM_NODES, TOPO_DEGREES, TOPO_CRITERIONS, TOPO_SEEDS) 
+function plot_experiments(data_exp, title_in, PATH_OUTPUT_FIG_PDF, PLOT_MEAS, TOPO_NAMES, TOPO_NUM_NODES, TOPO_DEGREES, TOPO_CRITERIONS, TOPO_SEEDS) 
         
     for plot_meas_index=0:length(PLOT_MEAS)-1
         % Init subplot
@@ -17,22 +17,23 @@ function plot_experiments(data_exp, title, PLOT_MEAS, TOPO_NAMES, TOPO_NUM_NODES
 
         % Cat title
         title_names =  ["Seed", "Global balance", "Abs flux", "IDs time","Global balance time"];
-        title = strcat(title, " - ", title_names(PLOT_MEAS(plot_meas_index+1)+1));
+        title_str = strcat(title_in, " - ", title_names(PLOT_MEAS(plot_meas_index+1)+1));
         
         % Labels
         criterio = ["Number Hops" "Distance" ,"Power Balance", "Power Balance with Losses", "Link Losses", "Power Balance Weighted"];
-        title_column= ["Barabasi", "Waxman"];
         marker = ["-o", "--+", ":*", "-.d","-x", "--s"];
+        topos_str = ["Barabasi", "Waxman"];
         
         % Y axis
-        y_min= -55;
+        y_min= -25;
         y_max= 25;
-        y_jumps = 20;
+        y_jumps = 5;
         
         % X axis
         num_ticks_x = (100:10:200);
         name_ticks_x = {'100',' ','120',' ','140',' ','160',' ','180',' ','200'};
-        
+        %name_ticks_x = {'10','20','30','40','50','60','70','80','90','100','110','120','130','140','150','160','170','180','190','200'};
+
         % Error bar size
         Marker_Size = 6;
                 
@@ -43,7 +44,7 @@ function plot_experiments(data_exp, title, PLOT_MEAS, TOPO_NAMES, TOPO_NUM_NODES
         pos_legend = [0.53 0.11 0 0]; 
         
         % Generate PDF file
-        fig=figure('Name', sprintf('plot_%s.pdf', title));
+        fig=figure('Name', sprintf('plot_%s.pdf', title_str));
         fig.PaperOrientation='landscape';
         fig.PaperSize=paper_size;
         fig.Units = 'centimeters';
@@ -52,7 +53,7 @@ function plot_experiments(data_exp, title, PLOT_MEAS, TOPO_NAMES, TOPO_NUM_NODES
         % Get stats 
         [mean_model_grade_criterion_node, conf_int_model_grade_criterion_node] = statistics(data_exp,  TOPO_NAMES, TOPO_NUM_NODES, ...
                                                                                             TOPO_DEGREES, TOPO_CRITERIONS, TOPO_SEEDS);
-        
+
         % Get rid of the current subplot
         number_subplot = 1;
     
@@ -69,7 +70,7 @@ function plot_experiments(data_exp, title, PLOT_MEAS, TOPO_NAMES, TOPO_NUM_NODES
                     plot ((100:10:200), mean_model_grade_criterion_node{model_index+1}{degree_index+1}{criteria_index+1}(10:20,PLOT_MEAS(plot_meas_index+1)+1),marker(criteria_index+1),...
                         'LineWidth',line_size, 'MarkerSize', Marker_Size);
                     errorbar((100:10:200), mean_model_grade_criterion_node{model_index+1}{degree_index+1}{criteria_index+1}(10:20,PLOT_MEAS(plot_meas_index+1)+1),...
-                        conf_int_model_grade_criterion_node{model_index+1}{degree_index +1}{criteria}(10:20,PLOT_MEAS(plot_meas_index+1)+1)',".",'LineWidth',...
+                        conf_int_model_grade_criterion_node{model_index+1}{degree_index +1}{criteria_index+1}(10:20,PLOT_MEAS(plot_meas_index+1)+1)',".",'LineWidth',...
                         1, 'MarkerSize', Marker_Size);
                 end
     
@@ -87,17 +88,17 @@ function plot_experiments(data_exp, title, PLOT_MEAS, TOPO_NAMES, TOPO_NUM_NODES
                 
                 if (number_subplot == 1 || number_subplot == 3 || number_subplot == 5)
                     if PLOT_MEAS(plot_meas_index+1) == 0
-                        ylabel(sprintf("Degree %d\newline Seed",(degree_index +1)*2));
+                        ylabel(sprintf("Degree %d\n Seed",(degree_index +1)*2));
                     elseif (PLOT_MEAS(plot_meas_index+1) == 1 || PLOT_MEAS(plot_meas_index+1) == 2) 
-                        ylabel(sprintf("Degree %d\newline Power (kW)",(degree_index +1)*2));
+                        ylabel(sprintf("Degree %d\n Power (kW)",(degree_index +1)*2));
                     else
-                        ylabel(sprintf("Degree %d\newline Time (ms)",(degree_index +1)*2));
+                        ylabel(sprintf("Degree %d\n Time (ms)",(degree_index +1)*2));
                     end
     
                 end
                 
                 if (number_subplot == 1 || number_subplot == 2)
-                    title(title_column(model_index+1));
+                    title(topos_str(model_index+1));
                 end
     
                 if(number_subplot == 5 || number_subplot == 6)
@@ -117,19 +118,19 @@ function plot_experiments(data_exp, title, PLOT_MEAS, TOPO_NAMES, TOPO_NUM_NODES
         % Save the file
         if PLOT_MEAS(plot_meas_index+1) == 0
             format='%s/seed_%s.pdf';
-            print(fig,sprintf(format, path, titulo),'-dpdf','-fillpage');
+            print(fig,sprintf(format, PATH_OUTPUT_FIG_PDF, title_in),'-dpdf','-fillpage');
         elseif PLOT_MEAS(plot_meas_index+1) == 1
             format='%s/balance_%s.pdf';
-            print(fig,sprintf(format, path, titulo),'-dpdf','-fillpage');
+            print(fig,sprintf(format, PATH_OUTPUT_FIG_PDF, title_in),'-dpdf','-fillpage');
         elseif PLOT_MEAS(plot_meas_index+1) == 2
             format='%s/absFlux_%s.pdf';
-            print(fig,sprintf(format, path, titulo),'-dpdf','-fillpage');
+            print(fig,sprintf(format, PATH_OUTPUT_FIG_PDF, title_in),'-dpdf','-fillpage');
         elseif PLOT_MEAS(plot_meas_index+1) == 3
             format='%s/time_ID_%s.pdf';
-            print(fig,sprintf(format, path, titulo),'-dpdf','-fillpage');
+            print(fig,sprintf(format, PATH_OUTPUT_FIG_PDF, title_in),'-dpdf','-fillpage');
         else
             format='%s/time_balance_%s.pdf';
-            print(fig,sprintf(format, path, titulo),'-dpdf','-fillpage');
+            print(fig,sprintf(format, PATH_OUTPUT_FIG_PDF, title_in),'-dpdf','-fillpage');
         end
     end
 end
