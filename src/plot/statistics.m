@@ -1,13 +1,13 @@
-function [medias_modelo_grado_criterio_nodo, int_conf_modelo_grado_criterio_nodo] = statistics(datos,  TOPO_NAMES, TOPO_NUM_NODES, TOPO_DEGREES, TOPO_CRITERIONS, TOPO_SEEDS)   
+function [medias_modelo_grado_criterio_nodo, int_conf_modelo_grado_criterio_nodo] = statistics(datos,  TOPO_NAMES, TOPO_NUM_NODES, TOPO_DEGREES, TOPO_CRITERIONS, TOPO_SEEDS, PLOT_MEAS)   
     % media por semilla fijando criterio 
     
-    media = zeros(length(TOPO_SEEDS),length(TOPO_CRITERIONS));
-    media_de_medias_por_nodo = zeros(length(TOPO_NUM_NODES),length(TOPO_CRITERIONS));
-    media_de_medias_por_nodo_y_criterio = cell(length(TOPO_CRITERIONS),1);
+    media = zeros(length(TOPO_SEEDS),length(PLOT_MEAS));
+    media_de_medias_por_nodo = zeros(length(TOPO_NUM_NODES),length(PLOT_MEAS));
+    media_de_medias_por_nodo_y_criterio = cell(length(PLOT_MEAS),1);
     media_de_medias_por_nodo_criterio_y_grado = cell(length(TOPO_DEGREES),1);
     medias_modelo_grado_criterio_nodo = cell (length(TOPO_NAMES),1);
-    int_conf_por_nodo = zeros(length(TOPO_NUM_NODES),length(TOPO_CRITERIONS));
-    int_conf_por_nodo_y_criterio = cell(length(TOPO_CRITERIONS),1);
+    int_conf_por_nodo = zeros(length(TOPO_NUM_NODES),length(PLOT_MEAS));
+    int_conf_por_nodo_y_criterio = cell(length(PLOT_MEAS),1);
     int_conf_por_nodo_criterio_y_grado = cell(length(TOPO_DEGREES),1);
     int_conf_modelo_grado_criterio_nodo = cell(length(TOPO_NAMES),1);
 

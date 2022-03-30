@@ -16,7 +16,7 @@ function plot_experiments(data_exp, title_in, PATH_OUTPUT_FIG_PDF, PLOT_MEAS, TO
         line_size = 1.3;
 
         % Cat title
-        title_names =  ["Seed", "Global balance", "Abs flux", "IDs time","Global balance time"];
+        title_names =  ["Seed", "Global balance", "Abs flux", "IDs time","Global balance time", "Number of iterations"];
         title_str = strcat(title_in, " - ", title_names(PLOT_MEAS(plot_meas_index+1)+1));
         
         % Labels
@@ -31,9 +31,17 @@ function plot_experiments(data_exp, title_in, PATH_OUTPUT_FIG_PDF, PLOT_MEAS, TO
         
         % X axis
         num_ticks_x = (100:10:200);
+        %num_ticks_x = (120:1:150);
         name_ticks_x = {'100',' ','120',' ','140',' ','160',' ','180',' ','200'};
         %name_ticks_x = {'10','20','30','40','50','60','70','80','90','100','110','120','130','140','150','160','170','180','190','200'};
-
+        %name_ticks_x = 120:1:150;
+        
+        % Data range we want to plot from the data array
+        % For example for normal plot, we represent nodes from 100 to 200,
+        % which in data array uses the position 10 to 20, then
+        %data_range = 10:20;
+        data_range = (10:20);
+        
         % Error bar size
         Marker_Size = 6;
                 
@@ -52,7 +60,7 @@ function plot_experiments(data_exp, title_in, PATH_OUTPUT_FIG_PDF, PLOT_MEAS, TO
         
         % Get stats 
         [mean_model_grade_criterion_node, conf_int_model_grade_criterion_node] = statistics(data_exp,  TOPO_NAMES, TOPO_NUM_NODES, ...
-                                                                                            TOPO_DEGREES, TOPO_CRITERIONS, TOPO_SEEDS);
+                                                                                            TOPO_DEGREES, TOPO_CRITERIONS, TOPO_SEEDS, PLOT_MEAS);
 
         % Get rid of the current subplot
         number_subplot = 1;
@@ -67,17 +75,17 @@ function plot_experiments(data_exp, title_in, PATH_OUTPUT_FIG_PDF, PLOT_MEAS, TO
                 
                 % Plot all criteria 
                 for criteria_index=0:length(TOPO_CRITERIONS)-1
-                    plot ((100:10:200), mean_model_grade_criterion_node{model_index+1}{degree_index+1}{criteria_index+1}(10:20,PLOT_MEAS(plot_meas_index+1)+1),marker(criteria_index+1),...
+                    plot (num_ticks_x, mean_model_grade_criterion_node{model_index+1}{degree_index+1}{criteria_index+1}(data_range,PLOT_MEAS(plot_meas_index+1)+1),marker(criteria_index+1),...
                         'LineWidth',line_size, 'MarkerSize', Marker_Size);
-                    errorbar((100:10:200), mean_model_grade_criterion_node{model_index+1}{degree_index+1}{criteria_index+1}(10:20,PLOT_MEAS(plot_meas_index+1)+1),...
-                        conf_int_model_grade_criterion_node{model_index+1}{degree_index +1}{criteria_index+1}(10:20,PLOT_MEAS(plot_meas_index+1)+1)',".",'LineWidth',...
+                    errorbar(num_ticks_x, mean_model_grade_criterion_node{model_index+1}{degree_index+1}{criteria_index+1}(data_range,PLOT_MEAS(plot_meas_index+1)+1),...
+                        conf_int_model_grade_criterion_node{model_index+1}{degree_index +1}{criteria_index+1}(data_range,PLOT_MEAS(plot_meas_index+1)+1)',".",'LineWidth',...
                         1, 'MarkerSize', Marker_Size);
                 end
     
                 % Adjust the curr subplot
                 xticks(num_ticks_x);
                 xticklabels(name_ticks_x);
-                if (PLOT_MEAS(plot_meas_index+1) == 1 || PLOT_MEAS(plot_meas_index+1) == 2) 
+                if (PLOT_MEAS(plot_meas_index+1) == 1) 
                     ylim([y_min y_max]);
                     yticks(y_min:y_jumps:y_max)
                 end
@@ -91,8 +99,10 @@ function plot_experiments(data_exp, title_in, PATH_OUTPUT_FIG_PDF, PLOT_MEAS, TO
                         ylabel(sprintf("Degree %d\n Seed",(degree_index +1)*2));
                     elseif (PLOT_MEAS(plot_meas_index+1) == 1 || PLOT_MEAS(plot_meas_index+1) == 2) 
                         ylabel(sprintf("Degree %d\n Power (kW)",(degree_index +1)*2));
-                    else
+                    elseif (PLOT_MEAS(plot_meas_index+1) == 3 || PLOT_MEAS(plot_meas_index+1) == 4)
                         ylabel(sprintf("Degree %d\n Time (ms)",(degree_index +1)*2));
+                    else
+                        ylabel(sprintf("Degree %d\n Number of iterations",(degree_index +1)*2));
                     end
     
                 end
@@ -128,10 +138,14 @@ function plot_experiments(data_exp, title_in, PATH_OUTPUT_FIG_PDF, PLOT_MEAS, TO
         elseif PLOT_MEAS(plot_meas_index+1) == 3
             format='%s/time_ID_%s.pdf';
             print(fig,sprintf(format, PATH_OUTPUT_FIG_PDF, title_in),'-dpdf','-fillpage');
-        else
+        elseif PLOT_MEAS(plot_meas_index+1) == 4
             format='%s/time_balance_%s.pdf';
+            print(fig,sprintf(format, PATH_OUTPUT_FIG_PDF, title_in),'-dpdf','-fillpage');
+        else
+            format='%s/number_iterations_%s.pdf';
             print(fig,sprintf(format, PATH_OUTPUT_FIG_PDF, title_in),'-dpdf','-fillpage');
         end
     end
 end
+
 

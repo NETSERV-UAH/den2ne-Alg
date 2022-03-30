@@ -15,7 +15,7 @@ PATH_RESUTLS_MAT_DATA = './';
 PATH_OUTPUT_FIG_PDF = './fig';
 
 % Name 
-NAME_RESUTLS = 'results_v5';
+NAME_RESUTLS = 'results_v8';
 
 % Script flags
 SAVE_FIG = true;
@@ -24,14 +24,14 @@ SAVE_FIG = true;
 TOPO_NAMES = ["barabasi" , "waxman"];
 TOPO_NUM_NODES = 10:10:200;
 TOPO_DEGREES = 2:2:6;
-TOPO_CRITERIONS = 0:1:4;
+TOPO_CRITERIONS = 0:1:5;
 TOPO_BEHAVIORAL = 0:1:3;
 TOPO_LOAD_LIMIT = 0:1:1;
 TOPO_SEEDS = 1:1:10;
 TOPO_RUNS = 1:1:10;
 
 % Plot vars
-PLOT_MEAS = [0 1 2 3];  % Seed(0)
+PLOT_MEAS = [0 1 2 3 4];  % Seed(0)
                         % Global balance (1)
                         % Abs flux(2)
                         % IDs time (3)
@@ -63,7 +63,7 @@ for limit_index=0:length(TOPO_LOAD_LIMIT)-1
                 for degree_index=0:length(TOPO_DEGREES)-1
                     for criteria_index=0:length(TOPO_CRITERIONS)-1
                         for seed_index=0:length(TOPO_SEEDS)-1
-                            seg2mseg(data{limit_index + 1, behavioral_index + 1}{model_index + 1, node_index + 1, degree_index + 1}{criteria_index + 1, seed_index +1});
+                            data{limit_index + 1, behavioral_index + 1}{model_index + 1, node_index + 1, degree_index + 1}{criteria_index + 1, seed_index +1} = seg2mseg(data{limit_index + 1, behavioral_index + 1}{model_index + 1, node_index + 1, degree_index + 1}{criteria_index + 1, seed_index +1});
                         end
                     end
                 end
