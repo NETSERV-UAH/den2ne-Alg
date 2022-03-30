@@ -55,42 +55,42 @@ def prueba(path_results, path_topology, topo_seed, criterion, conf_losses, load_
     n_nodes = int(node_file.split('-')[-2])
     #EJECUCIONES = n_runs con semillas
     for seed_run in range(n_runs):
-    seed = n_nodes*100 + topo_seed*10 + seed_run
-    #Recogemos los datos de la topología BRITE con semilla de ejecución (seed run)
-    if load_limit:
-        loads = BRITE_interface.cargas_aleatorias_con_limite(node_file, seed)
-    else:
-        loads = BRITE_interface.cargas_aleatorias(node_file, seed)
+        seed = n_nodes*100 + topo_seed*10 + seed_run
+        #Recogemos los datos de la topología BRITE con semilla de ejecución (seed run)
+        if load_limit:
+            loads = BRITE_interface.cargas_aleatorias_con_limite(node_file, seed)
+        else:
+            loads = BRITE_interface.cargas_aleatorias(node_file, seed)
 
-    edges_conf = DataGatherer.getEdges_Config('data/links_config.csv')
-    edges = BRITE_interface.BRITEedges(edge_file, edges_conf, seed)
-    positions = BRITE_interface.BRITEpositions(node_file)
-    root = BRITE_interface.selectRoot(node_file, seed)
+        edges_conf = DataGatherer.getEdges_Config('data/links_config.csv')
+        edges = BRITE_interface.BRITEedges(edge_file, edges_conf, seed)
+        positions = BRITE_interface.BRITEpositions(node_file)
+        root = BRITE_interface.selectRoot(node_file, seed)
 
-    #Creamos el grafos
-    G = Graph(0, loads, edges, list(), edges_conf, None, root)
+        #Creamos el grafos
+        G = Graph(0, loads, edges, list(), edges_conf, None, root)
 
-    #ALGORITMO
-    G_den2ne_alg = Den2ne(G)
+        #ALGORITMO
+        G_den2ne_alg = Den2ne(G)
 
-    inicio_id = time.time()
-    G_den2ne_alg.spread_ids()
-    fin_id = time.time()
+        inicio_id = time.time()
+        G_den2ne_alg.spread_ids()
+        fin_id = time.time()
 
-    #Ahora seleccionamos las IDS por el criterio
-    G_den2ne_alg.selectBestIDs(criterion)
+        #Ahora seleccionamos las IDS por el criterio
+        G_den2ne_alg.selectBestIDs(criterion)
 
-    inicio_balance = time.time()
-    [total_balance_ideal, abs_flux] = G_den2ne_alg.globalBalance(withLosses=LOSSES[conf_losses], withCap=CAPACITY[conf_losses], withDebugPlot=DEBUG_PLOT, positions=positions, path=path_results)
-    fin_balance = time.time()
+        inicio_balance = time.time()
+        [total_balance_ideal, abs_flux] = G_den2ne_alg.globalBalance(withLosses=LOSSES[conf_losses], withCap=CAPACITY[conf_losses], withDebugPlot=DEBUG_PLOT, positions=positions, path=path_results)
+        fin_balance = time.time()
 
-    tiempo_balance = fin_balance - inicio_balance
-    tiempo_id = fin_id - inicio_id
-    
+        tiempo_balance = fin_balance - inicio_balance
+        tiempo_id = fin_id - inicio_id
+        
 
-    #Escritura de resultados
-    #FORMATO: seed_run, balance, abs_flux, time_ID, time_balance
-    file.write(str(seed) + ',' + str(total_balance_ideal) + ',' + str(abs_flux) + ',' + str(tiempo_id) + ',' + str(tiempo_balance) + '\n')
+        #Escritura de resultados
+        #FORMATO: seed_run, balance, abs_flux, time_ID, time_balance
+        file.write(str(seed) + ',' + str(total_balance_ideal) + ',' + str(abs_flux) + ',' + str(tiempo_id) + ',' + str(tiempo_balance) + '\n')
 
     file.close()
 
