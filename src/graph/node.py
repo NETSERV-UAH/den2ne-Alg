@@ -23,6 +23,7 @@ class Node(object):
         self.neighbors = list()
         self.links = list()
         self.ids = list()
+        self.ids_root_count = 0  # Lo usamos solamente para den2neMultiroot.
 
     def addNeighbor(self, neighbor, type_link, state, dist, conf, coef_r, i_max):
         """
