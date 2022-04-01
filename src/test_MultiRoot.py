@@ -67,10 +67,10 @@ def test(path_results, path_topology, topo_seed, criterion, conf_losses, load_li
     file=open(path_results+ '/' + file_name, 'w')
     rootfile=open(path_results+ '/' + root_file_name, 'w')
 
-    n_nodes = int(node_file.split('-')[1]
+    n_nodes = int(node_file.split('-')[-2]
     #EJECUCIONES = n_runs con semillas
     for seed_run in range(n_runs):
-        seed = n_nodes*10 + seed_run
+        seed = n_nodes*100 + topo_seed*10 + seed_run
         #Recogemos los datos de la topología BRITE con semilla de ejecución (seed run)
         if load_limit:
             loads = BRITE_interface.cargas_aleatorias_con_limite(node_file, seed)
@@ -169,10 +169,10 @@ def test_without_iterations(path_results, path_topology, topo_seed, criterion, c
     file=open(path_results+ '/' + file_name, 'w')
     rootfile=open(path_results+ '/' + root_file_name, 'w')
 
-    n_nodes = int(node_file.split('-')[1])
+    n_nodes = int(node_file.split('-')[-2])
     #EJECUCIONES = n_runs con semillas
     for seed_run in range(n_runs):
-        seed = n_nodes*10 + seed_run
+        seed = n_nodes*100 + topo_seed*10 + seed_run
         #Recogemos los datos de la topología BRITE con semilla de ejecución (seed run)
         if load_limit:
             loads = BRITE_interface.cargas_aleatorias_con_limite(node_file, seed)
