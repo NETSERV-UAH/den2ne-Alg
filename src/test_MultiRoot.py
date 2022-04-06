@@ -67,7 +67,7 @@ def test(path_results, path_topology, topo_seed, criterion, conf_losses, load_li
     file=open(path_results+ '/' + file_name, 'w')
     rootfile=open(path_results+ '/' + root_file_name, 'w')
 
-    n_nodes = int(node_file.split('-')[-2]
+    n_nodes = int(node_file.split('-')[-2])
     #EJECUCIONES = n_runs con semillas
     for seed_run in range(n_runs):
         seed = n_nodes*100 + topo_seed*10 + seed_run
