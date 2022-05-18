@@ -10,12 +10,12 @@ clear variables
 %% Global Vars
 
 % Paths
-PATH_RESUTLS_DIR = '../results/';
+PATH_RESUTLS_DIR = './';
 PATH_RESUTLS_MAT_DATA = './';
 PATH_OUTPUT_FIG_PDF = './fig';
 
 % Name 
-NAME_RESUTLS = 'results_v8';
+NAME_RESUTLS = 'results_v13';
 
 % Script flags
 SAVE_FIG = true;
@@ -73,9 +73,12 @@ for limit_index=0:length(TOPO_LOAD_LIMIT)-1
 end
 
 % Third, we are going to plot all the results
+TOPO_NAMES=["barabasi"];
+
 for limit_index=0:length(TOPO_LOAD_LIMIT)-1
     for behavioral_index=0:length(TOPO_BEHAVIORAL)-1
         title = "exp_loadLimit_" + TOPO_LOAD_LIMIT(limit_index + 1) + "_behavioral_" + TOPO_BEHAVIORAL(behavioral_index + 1);
-        plot_experiments(data{limit_index +1,behavioral_index+1}, title, PATH_OUTPUT_FIG_PDF, PLOT_MEAS, TOPO_NAMES, TOPO_NUM_NODES, TOPO_DEGREES, TOPO_CRITERIONS, TOPO_SEEDS);
+        %plot_experiments(data{limit_index +1,behavioral_index+1}, title, PATH_OUTPUT_FIG_PDF, PLOT_MEAS, TOPO_NAMES, TOPO_NUM_NODES, TOPO_DEGREES, TOPO_CRITERIONS, TOPO_SEEDS);
+        debug_plot_experiments(data{limit_index +1,behavioral_index+1}, title, PATH_OUTPUT_FIG_PDF, PLOT_MEAS, TOPO_NAMES, TOPO_NUM_NODES, TOPO_DEGREES, TOPO_CRITERIONS, TOPO_SEEDS);
     end
 end
