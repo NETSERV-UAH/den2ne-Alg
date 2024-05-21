@@ -45,7 +45,7 @@ function plotRangeLoads(init, fin)
     end
 
     grid on
-    title("Average global power balance")
+    title("Average global power balance",'FontSize',16)
     ylabel("Power (kW)")
     legend("Ideal", "Lossy", "Lossy-constrained link capacity", 'Location', 'southoutside', 'NumColumns', 3)
     set(gca,'XTickLabel', {'Criterion 1' 'Criterion 2' 'Criterion 3' 'Criterion 4' 'Criterion 5' 'Criterion 6'});
@@ -74,7 +74,7 @@ function plotRangeLoads(init, fin)
     end
     
     grid on
-    title("Absolute value of the average power flow")
+    title("Absolute value of the average power flow", 'FontSize',16)
     ylabel("Power (kW)")
     legend("Ideal", "Lossy", "Lossy-constrained link capacity", 'Location', 'southoutside', 'NumColumns', 3)
     set(gca,'XTickLabel', {'Criterion 1' 'Criterion 2' 'Criterion 3' 'Criterion 4' 'Criterion 5' 'Criterion 6'}); 
@@ -93,7 +93,7 @@ function plotRangeLoads(init, fin)
     bar(data_loss.', 0.5, 'FaceColor', [0.9290 0.6940 0.1250]), hold on;
     errorbar(data_loss.', sem_loss.', 'k', 'linestyle', 'none');
     grid on
-    title("Switch propagation and insertion losses on averageS")
+    title("Switch propagation and insertion losses on average", 'FontSize',16)
     ylabel("Power (kW)")
     set(gca,'XTickLabel', {'Criterion 1' 'Criterion 2' 'Criterion 3' 'Criterion 4' 'Criterion 5' 'Criterion 6'});
     hold off;
@@ -111,7 +111,7 @@ function plotRangeLoads(init, fin)
     bar(data_loss_Cap.', 0.5, 'FaceColor', [0.6350 0.0780 0.1840]), hold on;
     errorbar(data_loss_Cap.', sem_loss_Cap.', 'k', 'linestyle', 'none');
     grid on
-    title("Excess link capacity losses on average")
+    title("Excess link capacity losses on average", 'FontSize',16)
     ylabel("Power (kW)")
     set(gca,'XTickLabel', {'Criterion 1' 'Criterion 2' 'Criterion 3' 'Criterion 4' 'Criterion 5' 'Criterion 6'});
     hold off;
