@@ -45,9 +45,9 @@ function plotRangeLoads(init, fin)
     end
 
     grid on
-    title("Balance de potencias global en promedio")
-    ylabel("Potencia (kW)")
-    legend("Ideal", "Con perdidas", "Con perdidas y capacidades", 'Location', 'southoutside', 'NumColumns', 3)
+    title("Average global power balance")
+    ylabel("Power (kW)")
+    legend("Ideal", "Lossy", "Lossy-constrained link capacity", 'Location', 'southoutside', 'NumColumns', 3)
     set(gca,'XTickLabel', {'Criterion 1' 'Criterion 2' 'Criterion 3' 'Criterion 4' 'Criterion 5' 'Criterion 6'});
     hold off;
     set(h,'Units','Inches');
@@ -74,9 +74,9 @@ function plotRangeLoads(init, fin)
     end
     
     grid on
-    title("Valor absoluto del flujo de potencias en promedio")
-    ylabel("Potencia (kW)")
-    legend("Ideal", "Con perdidas", "Con perdidas y capacidades", 'Location', 'southoutside', 'NumColumns', 3)
+    title("Absolute value of the average power flow")
+    ylabel("Power (kW)")
+    legend("Ideal", "Lossy", "Lossy-constrained link capacity", 'Location', 'southoutside', 'NumColumns', 3)
     set(gca,'XTickLabel', {'Criterion 1' 'Criterion 2' 'Criterion 3' 'Criterion 4' 'Criterion 5' 'Criterion 6'}); 
     hold off;
     set(h,'Units','Inches');
@@ -93,8 +93,8 @@ function plotRangeLoads(init, fin)
     bar(data_loss.', 0.5, 'FaceColor', [0.9290 0.6940 0.1250]), hold on;
     errorbar(data_loss.', sem_loss.', 'k', 'linestyle', 'none');
     grid on
-    title("Perdidas  por propagación e inserción de switches en promedio")
-    ylabel("Potencia (kW)")
+    title("Switch propagation and insertion losses on averageS")
+    ylabel("Power (kW)")
     set(gca,'XTickLabel', {'Criterion 1' 'Criterion 2' 'Criterion 3' 'Criterion 4' 'Criterion 5' 'Criterion 6'});
     hold off;
     set(h,'Units','Inches');
@@ -111,8 +111,8 @@ function plotRangeLoads(init, fin)
     bar(data_loss_Cap.', 0.5, 'FaceColor', [0.6350 0.0780 0.1840]), hold on;
     errorbar(data_loss_Cap.', sem_loss_Cap.', 'k', 'linestyle', 'none');
     grid on
-    title("Perdidas por exceso en la capacidad del enlace en promedio")
-    ylabel("Potencia (kW)")
+    title("Excess link capacity losses on average")
+    ylabel("Power (kW)")
     set(gca,'XTickLabel', {'Criterion 1' 'Criterion 2' 'Criterion 3' 'Criterion 4' 'Criterion 5' 'Criterion 6'});
     hold off;
     set(h,'Units','Inches');
