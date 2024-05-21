@@ -13,7 +13,7 @@ from dataCollector.dataCollector import DataGatherer
 def usage():
 
     # Recolectamos los datos
-    loads = DataGatherer.getLoads('data/loads.csv', 3)
+    loads = DataGatherer.getLoads('data/load_v2.csv', 3)
     edges = DataGatherer.getEdges('data/links.csv')
     edges_conf = DataGatherer.getEdges_Config('data/links_config.csv')
     sw_edges = DataGatherer.getSwitches('data/switches.csv')
