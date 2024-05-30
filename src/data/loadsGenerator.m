@@ -5,7 +5,7 @@
 %   [+] Fecha: 21 May 2024  
 clc
 close all
-clear varibles
+clear variables
 
 %% Global Vars 
 PATH_LOADS_PROFILES = "";
