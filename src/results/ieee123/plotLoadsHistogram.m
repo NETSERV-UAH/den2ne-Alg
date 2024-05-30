@@ -14,7 +14,7 @@ clear global
 PATH_LOADS_DIST = "../../data/";
 
 % Lets read the csv with all the info
-data_table = readtable(strcat(PATH_LOADS_DIST,"load_v2.csv"), 'NumHeaderLines',1);
+data_table = readtable(strcat(PATH_LOADS_DIST,"loads_v2.csv"), 'NumHeaderLines',1);
     
 % Parse from table to matrix 
 data = data_table{:,2:end};
