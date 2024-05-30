@@ -57,28 +57,28 @@ figure();
 % con
 subplot(3, 1, 1);
 plot(time_vector, con_vector, 'b', 'LineWidth', 1.5);
-title('Consumo');
-xlabel('Hora del día');
-ylabel('Consumo (kW)');
+title('Consumption each 15 minutes');
+xlabel('Time of the day');
+ylabel('Consumption (kW)');
 grid on;
 
 % gen
 subplot(3, 1, 2);
 plot(time_vector, gen_vector, 'g', 'LineWidth', 1.5);
-title('Generación cada 15 minutos');
-xlabel('Hora del día');
-ylabel('Generación (kW)');
+title('Generation each 15 minutes');
+xlabel('Time of the day');
+ylabel('Generation (kW)');
 grid on;
 
 % balance
 subplot(3, 1, 3);
 plot(time_vector, balance_vector, 'r', 'LineWidth', 1.5);
-title('Balance (Generación - Consumo)');
-xlabel('Hora del día');
+title('Balance (Generation - Consumption)');
+xlabel('Time of the day');
 ylabel('Balance (kW)');
 grid on;
 
-sgtitle('Consumo, Generación y Balance en 24 horas');
+sgtitle('Consumption, Generation and Balance within 24 hours');
 
 
 % Third, lets plot uG needs
@@ -102,7 +102,7 @@ hold off;
 perfiles_balance = perfiles_generacion - perfiles_consumo;
 
 % Csv name
-output_file = 'load_v2.csv';
+output_file = 'loads_v2.csv';
 
 % Lets create the header 
 num_intervals = 96; 
