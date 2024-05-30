@@ -66,7 +66,7 @@ class Link(object):
         """
             Función para calcular las perdidas de inserción por un switch activo dada una Potencia incidente (kW - Kilowatts)
         """
-        return ((((Link.SWITCH_R)/(Link.VOLTAGE)**2) * (P_in*1000)**2)/1000)
+        return ((((Link.SWITCH_R)/(Link.VOLTAGE)**2) * (abs(P_in)*1000)**2)/1000)
 
     def getLosses_Link(self, P_in):
         """
@@ -75,4 +75,4 @@ class Link(object):
 
         r_eff = self.coef_R * (Link.ft2meters(self.dist)/1000)  # El coef_R esta en ohms/km -> la distancia nos venía en fts
 
-        return ((((r_eff)/(Link.VOLTAGE)**2) * (P_in*1000)**2)/1000)
+        return ((((r_eff)/(Link.VOLTAGE)**2) * (abs(P_in)*1000)**2)/1000)
