@@ -353,16 +353,21 @@ class Den2ne(object):
         init_node = self.G.nodes[id.hlmac[len(id.hlmac) - 1]]
         curr_load = init_node.load
         losses = 0
+        total_losses = 0
 
         for i in range(len(id.hlmac) - 1, 0, -1):
             curr_node = self.G.nodes[id.hlmac[i]]
 
-            losses += curr_node.links[
+            total_losses += curr_node.links[
                 curr_node.neighbors.index(id.hlmac[i - 1])
             ].getLosses(curr_load)
+            losses = curr_node.links[
+                curr_node.neighbors.index(id.hlmac[i - 1])
+            ].getLosses(curr_load)
+
             curr_load -= losses
 
-        return losses
+        return total_losses
 
     def selectBestID_by_weighted_balance(self):
         """
@@ -447,6 +452,37 @@ class Den2ne(object):
 
             cap = self.G.getLinkCapacity(origin.name, dst.name)
 
+            # Añadimos un print para debugear
+            # print(
+            #    f"[DEBUG][Step {iteration}][Origin | {origin.name} | {origin.load:.2f} kW][Destination | {dst.name} | {dst.load:.2f} kW][Losses {origin.links[origin.neighbors.index(dst.name)].getLosses(origin.load):.2f} kW]"
+            # )
+            # Definir la longitud fija para cada campo
+            step_width = 5
+            origin_name_width = 3
+            origin_load_width = 10
+            destination_name_width = 3
+            destination_load_width = 10
+            losses_width = 10
+
+            # Definir los códigos de color
+            GREEN = "\033[92m"
+            BLUE = "\033[94m"
+            RED = "\033[91m"
+            YELLOW = "\033[93m"
+            BOLD = "\033[1m"
+            RESET = "\033[0m"
+
+            # Crear el mensaje formateado
+            message = (
+                f"[DEBUG][Step {iteration:<{step_width}}]"
+                f"{GREEN}[Origin | {origin.name:<{origin_name_width}} | {BOLD}{origin.load:>{origin_load_width}.2f}{RESET} kW]{RESET} --> "
+                f"{BLUE}[Destination | {dst.name:<{destination_name_width}} | {BOLD}{dst.load:>{destination_load_width}.2f}{RESET} kW]{RESET}"
+                f"{RED}[Losses {BOLD}{origin.links[origin.neighbors.index(dst.name)].getLosses(origin.load):>{losses_width}.2f}{RESET} kW]{RESET}"
+            )
+
+            # Imprimir el mensaje
+            print(message)
+
             # Agregamos la carga de origen a destino
             if withLosses and withCap:
                 if cap is None or cap >= origin.load:
@@ -504,37 +540,6 @@ class Den2ne(object):
 
                 # Actualizamos el flujo absoluto
                 abs_flux += abs(origin.load)
-
-            # Añadimos un print para debugear
-            # print(
-            #    f"[DEBUG][Step {iteration}][Origin | {origin.name} | {origin.load:.2f} kW][Destination | {dst.name} | {dst.load:.2f} kW][Losses {origin.links[origin.neighbors.index(dst.name)].getLosses(origin.load):.2f} kW]"
-            # )
-            # Definir la longitud fija para cada campo
-            step_width = 5
-            origin_name_width = 3
-            origin_load_width = 10
-            destination_name_width = 3
-            destination_load_width = 10
-            losses_width = 10
-
-            # Definir los códigos de color
-            GREEN = "\033[92m"
-            BLUE = "\033[94m"
-            RED = "\033[91m"
-            YELLOW = "\033[93m"
-            BOLD = "\033[1m"
-            RESET = "\033[0m"
-
-            # Crear el mensaje formateado
-            message = (
-                f"[DEBUG][Step {iteration:<{step_width}}]"
-                f"{GREEN}[Origin | {origin.name:<{origin_name_width}} | {BOLD}{origin.load:>{origin_load_width}.2f}{RESET} kW]{RESET} --> "
-                f"{BLUE}[Destination | {dst.name:<{destination_name_width}} | {dst.load:>{destination_load_width}.2f} kW]{RESET}"
-                f"{RED}[Losses {origin.links[origin.neighbors.index(dst.name)].getLosses(origin.load):>{losses_width}.2f} kW]{RESET}"
-            )
-
-            # Imprimir el mensaje
-            print(message)
 
             # Ajustamos a cero el valor de la carga en origen
             self.G.nodes[origin_index].load = 0.0
