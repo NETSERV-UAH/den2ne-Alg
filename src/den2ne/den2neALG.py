@@ -419,13 +419,21 @@ class Den2ne(object):
         """
         Función para calcular la distancia a zero de la suma de la potencia origen y la destino
         """
-        # Origen
-        origin_load = self.G.nodes[id.getOrigin()].load
+        val = 0
 
-        # Destino
-        dst_load = self.G.nodes[id.getNextHop()].load
+        # En caso de que seamos el root
+        if len(id.hlmac) == 1:
+            val = self.G.nodes[id.getOrigin()].load
+        else:
+            # Origen
+            origin_load = self.G.nodes[id.getOrigin()].load
 
-        return abs(dst_load + origin_load)
+            # Destino
+            dst_load = self.G.nodes[id.getNextHop()].load
+
+            val = abs(dst_load + origin_load)
+
+        return val
 
     def selectBestID_by_power2zero_with_Losses(self):
         """
@@ -445,23 +453,32 @@ class Den2ne(object):
         """
         Función para calcular la distancia a zero de la suma de la potencia origen y la destino teniendo en cuenta las perdidas
         """
-        # Origen
-        origin_load = self.G.nodes[id.getOrigin()].load
 
-        # Destino
-        dst_load = self.G.nodes[id.getNextHop()].load
+        val = 0
 
-        return abs(
-            dst_load
-            + origin_load
-            - self.G.nodes[id.getOrigin()]
-            .links[
-                self.G.nodes[id.getOrigin()].neighbors.index(
-                    self.G.nodes[id.getNextHop()].name
-                )
-            ]
-            .getLosses(origin_load)
-        )
+        # En caso de que seamos el root
+        if len(id.hlmac) == 1:
+            val = self.G.nodes[id.getOrigin()].load
+        else:
+            # Origen
+            origin_load = self.G.nodes[id.getOrigin()].load
+
+            # Destino
+            dst_load = self.G.nodes[id.getNextHop()].load
+
+            val = abs(
+                dst_load
+                + origin_load
+                - self.G.nodes[id.getOrigin()]
+                .links[
+                    self.G.nodes[id.getOrigin()].neighbors.index(
+                        self.G.nodes[id.getNextHop()].name
+                    )
+                ]
+                .getLosses(origin_load)
+            )
+
+        return val
 
     def IDsCheck(self, n_repetition=0):
         """
