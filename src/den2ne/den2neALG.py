@@ -18,6 +18,8 @@ class Den2ne(object):
     CRITERION_POWER_BALANCE_WITH_LOSSES = 3
     CRITERION_LINKS_LOSSES = 4
     CRITERION_POWER_BALANCE_WEIGHTED = 5
+    CRITERION_POWER_TO_ZERO = 6
+    CRITERION_POWER_TO_ZERO_WITH_LOSSES = 7
 
     # Fijamos el número máximo de IDs por nodo
     IDS_MAX = 10
@@ -232,6 +234,12 @@ class Den2ne(object):
         elif Den2ne.CRITERION_POWER_BALANCE_WEIGHTED == criterion:
             self.selectBestID_by_weighted_balance()
 
+        elif Den2ne.CRITERION_POWER_TO_ZERO == criterion:
+            self.selectBestID_by_power2zero()
+
+        elif Den2ne.CRITERION_POWER_TO_ZERO_WITH_LOSSES == criterion:
+            self.selectBestID_by_power2zero_with_Losses()
+
         # Por último, vamos a ver el las dependencias con los switchs y activar aquellos que sean necesarios
         dependences = list(
             set(sum([active_ids.depends_on for active_ids in self.global_ids], []))
@@ -394,6 +402,68 @@ class Den2ne(object):
             balance += self.G.nodes[id.hlmac[i]].load
 
         return balance / len(id.hlmac)
+
+    def selectBestID_by_power2zero(self):
+        """
+        Función para decidir la mejor ID de un nodo cercanía de potecia a cero, al root
+        """
+        for node in self.G.nodes:
+            power2zero = [self.getTotalPower2Zero(id) for id in self.G.nodes[node].ids]
+
+            self.G.nodes[node].ids[power2zero.index(max(power2zero))].active = True
+            self.global_ids.append(self.G.nodes[node].getActiveID())
+
+        # self.flowInertia()
+
+    def getTotalPower2Zero(self, id):
+        """
+        Función para calcular la distancia a zero de la suma de la potencia origen y la destino
+        """
+        # Origen
+        origin_load = self.G.nodes[id.getOrigin()].load
+
+        # Destino
+        dst_load = self.G.nodes[id.getNextHop()].load
+
+        return abs(dst_load + origin_load)
+
+    def selectBestID_by_power2zero_with_Losses(self):
+        """
+        Función para decidir la mejor ID de un nodo cercanía de potecia a cero, al root teniendo en cuenta las perdidas
+        """
+        for node in self.G.nodes:
+            norm_balances = [
+                self.getTotalWeightedBalance(id) for id in self.G.nodes[node].ids
+            ]
+
+            self.G.nodes[node].ids[
+                norm_balances.index(max(norm_balances))
+            ].active = True
+            self.global_ids.append(self.G.nodes[node].getActiveID())
+
+        # self.flowInertia()
+
+    def getTotalPower2Zero_with_Losses(self, id):
+        """
+        Función para calcular la distancia a zero de la suma de la potencia origen y la destino teniendo en cuenta las perdidas
+        """
+        # Origen
+        origin_load = self.G.nodes[id.getOrigin()].load
+
+        # Destino
+        dst_load = self.G.nodes[id.getNextHop()].load
+
+        return abs(
+            dst_load
+            + origin_load
+            - self.G.nodes[id.getOrigin()]
+            .links[
+                self.G.nodes[id.getOrigin()].neighbors.index(
+                    self.G.nodes[id.getNextHop()].name
+                )
+            ]
+            .getLosses(origin_load)
+        )
 
     def IDsCheck(self, n_repetition=0):
         """

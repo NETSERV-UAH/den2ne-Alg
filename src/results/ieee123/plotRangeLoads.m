@@ -7,7 +7,7 @@
 function plotRangeLoads(init, fin)
     
     % Preparamos la matriz de datos 
-    data3d = zeros (6,7,fin-init);
+    data3d = zeros (3,7,fin-init);
     
     
     % Obtenemos los datos de los ficheros csv indicados
