@@ -146,6 +146,11 @@ def test_ieee123():
                 path="results/",
             )
 
+            # Genearación de informes
+            G_den2ne_alg.write_loads_report(
+                f"results/{topo_name}/reports/report_loads_d{delta}_ideal_c{criterion}.txt"
+            )
+
             # Re-Init loads
             G_den2ne_alg.updateLoads(loads, delta)
             G_den2ne_alg.clearSelectedIDs()
@@ -160,6 +165,11 @@ def test_ieee123():
                     positions=positions,
                     path="results/",
                 )
+            )
+
+            # Genearación de informes
+            G_den2ne_alg.write_loads_report(
+                f"results/{topo_name}/reports/report_loads_d{delta}_losses_c{criterion}.txt"
             )
 
             # Re-Init loads
@@ -192,8 +202,9 @@ def test_ieee123():
             G_den2ne_alg.write_swConfig_report(
                 f"results/{topo_name}/reports/report_swConfig_d{delta}_c{criterion}.txt"
             )
+
             G_den2ne_alg.write_loads_report(
-                f"results/{topo_name}/reports/report_loads_d{delta}_c{criterion}.txt"
+                f"results/{topo_name}/reports/report_loads_d{delta}_lossesCap_c{criterion}.txt"
             )
 
             # Generamos la configuración logica
