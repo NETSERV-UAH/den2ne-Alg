@@ -413,7 +413,7 @@ class Den2ne(object):
             self.G.nodes[node].ids[power2zero.index(min(power2zero))].active = True
             self.global_ids.append(self.G.nodes[node].getActiveID())
 
-        self.flowInertia()
+        # self.flowInertia()
 
     def getTotalPower2Zero(self, id):
         """
@@ -447,7 +447,7 @@ class Den2ne(object):
             self.G.nodes[node].ids[power2zero.index(min(power2zero))].active = True
             self.global_ids.append(self.G.nodes[node].getActiveID())
 
-        self.flowInertia()
+        # self.flowInertia()
 
     def getTotalPower2Zero_with_Losses(self, id):
         """
