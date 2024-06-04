@@ -410,7 +410,7 @@ class Den2ne(object):
         for node in self.G.nodes:
             power2zero = [self.getTotalPower2Zero(id) for id in self.G.nodes[node].ids]
 
-            self.G.nodes[node].ids[power2zero.index(max(power2zero))].active = True
+            self.G.nodes[node].ids[power2zero.index(min(power2zero))].active = True
             self.global_ids.append(self.G.nodes[node].getActiveID())
 
         # self.flowInertia()
@@ -432,13 +432,11 @@ class Den2ne(object):
         Función para decidir la mejor ID de un nodo cercanía de potecia a cero, al root teniendo en cuenta las perdidas
         """
         for node in self.G.nodes:
-            norm_balances = [
+            power2zero = [
                 self.getTotalWeightedBalance(id) for id in self.G.nodes[node].ids
             ]
 
-            self.G.nodes[node].ids[
-                norm_balances.index(max(norm_balances))
-            ].active = True
+            self.G.nodes[node].ids[power2zero.index(min(power2zero))].active = True
             self.global_ids.append(self.G.nodes[node].getActiveID())
 
         # self.flowInertia()
