@@ -11,7 +11,7 @@ class Link(object):
     SWITCH = 0
 
     # Vamos a definir constantes que son propias del enlace
-    VOLTAGE = 400  # Volts
+    VOLTAGE = 415  # Volts
     SWITCH_R = 0.1  # Ohms
 
     def __init__(self, node_a, node_b, type_link, state, dist, conf, coef_r, i_max):
