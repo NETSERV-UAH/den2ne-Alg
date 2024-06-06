@@ -106,7 +106,7 @@ def test_ieee123():
         )
 
     # Recolectamos los datos
-    loads = DataGatherer.getLoads("data/loads_v2.csv", 3)
+    loads = DataGatherer.getLoads("data/loads_v2_norm.csv", 3)
     edges = DataGatherer.getEdges("data/links.csv")
     edges_conf = DataGatherer.getEdges_Config("data/links_config.csv")
     sw_edges = DataGatherer.getSwitches("data/switches.csv")
