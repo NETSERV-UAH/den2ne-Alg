@@ -40,9 +40,6 @@ def test_ieee123_without_iterations():
     # Creamos la var del grafo para el primer instante
     G = Graph(0, loads, edges, sw_edges, edges_conf, root=["150", "610", "451", "350"])
 
-    # Podamos los nodos virtuales que estén a modo de ampliación.
-    G.pruneGraph()
-
     # Iniciamos el algoritmo
     G_den2ne_alg = Den2neMultiRoot(G)
 
@@ -66,9 +63,9 @@ def test_ieee123_without_iterations():
             [total_balance_ideal, abs_flux] = G_den2ne_alg.globalBalance(
                 withLosses=False,
                 withCap=False,
-                withDebugPlot=False,
+                withDebugPlot=True,
                 positions=positions,
-                path="results/",
+                path="results/ieee123_multiroot/",
             )
 
             # Genearación de informes

@@ -827,6 +827,10 @@ class Den2neMultiRoot(object):
             for j in range(0, len(self.G.nodes[node].ids)):
                 self.G.nodes[node].ids[j].active = False
 
+            # Hemos añadido esta linea para que a la hora de pintar con la herramienta de debug se pueda pintar bien de un estado inicial sin direcciones
+            for link in self.G.nodes[node].links:
+                link.direction = None
+
     def clearSpreadIDs(self):
         """
         FUnción para borrar todas las IDs de cada nodo
