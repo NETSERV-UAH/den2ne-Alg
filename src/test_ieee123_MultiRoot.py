@@ -63,7 +63,7 @@ def test_ieee123_without_iterations():
             [total_balance_ideal, abs_flux] = G_den2ne_alg.globalBalance(
                 withLosses=False,
                 withCap=False,
-                withDebugPlot=True,
+                withDebugPlot=False,
                 positions=positions,
                 path="results/ieee123_multiroot/",
             )

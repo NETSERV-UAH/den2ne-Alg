@@ -481,16 +481,21 @@ class Den2neMultiRoot(object):
         init_node = self.G.nodes[id.hlmac[len(id.hlmac) - 1]]
         curr_load = init_node.load
         losses = 0
+        total_losses = 0
 
         for i in range(len(id.hlmac) - 1, 0, -1):
             curr_node = self.G.nodes[id.hlmac[i]]
 
-            losses += curr_node.links[
+            total_losses += curr_node.links[
                 curr_node.neighbors.index(id.hlmac[i - 1])
             ].getLosses(curr_load)
+            losses = curr_node.links[
+                curr_node.neighbors.index(id.hlmac[i - 1])
+            ].getLosses(curr_load)
+
             curr_load -= losses
 
-        return losses
+        return total_losses
 
     def selectBestID_by_weighted_balance(self, roots_closed):
         """
