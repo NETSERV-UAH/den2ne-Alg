@@ -3,7 +3,7 @@ DEN2NE - Distributed ENergy ENvironments and NEtworks
 
 We present DEN2NE, a novel algorithm designed for the automatic distribution and reallocation of resources in distributed environments. The algorithm has been implemented with six different criteria in order to adapt it to the specific use case under consideration. The results obtained from DEN2DE are promising, owing to its adaptability and its average execution time, which follows a linear distribution in relation to the topology size.
 
-![img](doc/img/fig3.eps)
+![img](doc/img/fig3.svg)
 
 If you use the switch for academic purpuses, please consider the use of this citation.
 
